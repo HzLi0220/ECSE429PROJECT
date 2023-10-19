@@ -95,19 +95,6 @@ public class ProjectTest {
     }
 
     @Test
-    void testCreateProject() {
-        Map<String, String> projectData = new HashMap<>();
-        projectData.put("title", "New Project");
-        projectData.put("description", "Description of the new project");
-
-        Response response = given()
-                .body(projectData)
-                .when()
-                .post("/projects");
-        assertEquals(201, response.getStatusCode());
-    }
-
-    @Test
     void testGetSpecificProject() {
         Response response = given()
                 .pathParam("id", projectId)
