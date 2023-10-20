@@ -7,7 +7,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-
 import static io.restassured.RestAssured.delete;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeAll;
@@ -53,7 +52,6 @@ public class CategoryTest {
                 .when()
                 .post("/categories");
         assertEquals(201, response.getStatusCode());
-
         categoryId = response.jsonPath().getInt("id");
         System.out.println("Set Up category with ID " + categoryId);
     }
@@ -61,12 +59,13 @@ public class CategoryTest {
     @AfterEach
     public void tearDown() {
         // Delete the category after each test
-        Response response = given()
-                .pathParam("id", categoryId)
-                .when()
-                .delete("/categories/{id}");
-        assertEquals(200, response.getStatusCode());
-
+        if (!categoryDeleted) {
+            Response response = given()
+                    .pathParam("id", categoryId)
+                    .when()
+                    .delete("/categories/{id}");
+            assertEquals(200, response.getStatusCode());
+        }
         // Mark the category as deleted
         categoryDeleted = true;
     }
@@ -96,8 +95,8 @@ public class CategoryTest {
     @Test
     void testPostCategoryWithoutID() {
         String requestBody =
-                "{\"title\": \"test title\", " +
-                "\"description\": \"test Description\"}";
+                "{\"title\": \"post category\", " +
+                "\"description\": \"testPostCategoryWithoutID\"}";
         Response response = given()
                 .header("Content-Type", "application/json")
                 .body(requestBody)
@@ -107,8 +106,39 @@ public class CategoryTest {
         assertTrue(response.contentType().contains(ContentType.JSON.toString()));
         // Validate the content
         String responseBody = response.getBody().asString();
-        assertTrue(responseBody.contains("test title"));
-        assertTrue(responseBody.contains("test Description"));
+        assertTrue(responseBody.contains("post category"));
+        assertTrue(responseBody.contains("testPostCategoryWithoutID"));
+
+        //delete the created category to restore system state
+        int categoryId = response.jsonPath().getInt("id");
+        Response deleteResponse = given()
+                .pathParam("id", categoryId)
+                .when()
+                .delete("/categories/{id}");
+        assertEquals(200, deleteResponse.getStatusCode());
+    }
+
+    @Test
+    void testPostCategoryAsXmlWithoutID() {
+        String xmlBody = "<category>"
+                + "<title>PostCategoryAsXml</title>"
+                + "<description>testPostCategoryAsXmlWithoutID</description>"
+                + "</category>";
+        Response response = given()
+                .contentType(ContentType.XML)
+                .body(xmlBody)
+                .when()
+                .post("/categories");
+        assertEquals(201, response.getStatusCode());
+        assertTrue(response.contentType().contains(ContentType.JSON.toString()));
+
+        //delete the created category to restore system state
+        int categoryId = response.jsonPath().getInt("id");
+        Response deleteResponse = given()
+                .pathParam("id", categoryId)
+                .when()
+                .delete("/categories/{id}");
+        assertEquals(200, deleteResponse.getStatusCode());
     }
 
     @Test
@@ -118,7 +148,6 @@ public class CategoryTest {
                 .queryParam("title", "test filtered categories")
                 .when()
                 .get("/categories");
-
         assertEquals(200, response.getStatusCode());
         assertTrue(response.contentType().contains(ContentType.JSON.toString()));
 
@@ -128,16 +157,14 @@ public class CategoryTest {
 
     @Test
     void testGetCategoryById() {
-
         Response response = given()
                 .accept(ContentType.JSON)
                 .when()
                 .get("/categories/" + categoryId);
-
         assertEquals(200, response.getStatusCode());
         assertTrue(response.contentType().contains(ContentType.JSON.toString()));
-
         String responseBody = response.getBody().asString();
+
         // Expected title and description
         String expectedTitle = "Test Category";
         String expectedDescription = "Description of the test category";
@@ -209,11 +236,17 @@ public class CategoryTest {
     }
 
     @Test
-    void testDeleteCategoryById() {
+    void testDeleteCategoryById() { // TOFIX: although the object does get deleted, the status code is 400 instead of 200
         Response response = given()
+                .pathParam("id", categoryId)
                 .when()
-                .delete("/categories/" + categoryId);
+                .delete("/categories/{id}");
+        System.out.println("when deleting the id is " + categoryId);
+        System.out.println("is mock object already deleted?" + categoryDeleted);
+
         assertTrue(response.getStatusCode() == 200 || response.getStatusCode() == 204);
+        String responseBody = response.getBody().asString();
+        System.out.println("Response Body: " + responseBody);
         assertEquals("", response.getBody().asString());
 
     }
@@ -231,11 +264,29 @@ public class CategoryTest {
 
     }
 
-    // --------------------- /categories/:id/todos/:id ---------------------
-
     // --------------------- /categories/:id/projects ---------------------
+    @Test
+    void testGetProjectsForCategory() {
+        Response response = given()
+                .when()
+                .get("/categories/" + categoryId + "/projects");
+        assertEquals(200, response.getStatusCode());
+        assertTrue(response.contentType().contains(ContentType.JSON.toString()));
+    }
 
-    // --------------------- /categories/:id/projects/:id ---------------------
+    @Test
+    void testHeadProjectsForCategory() {
+         Response response = given()
+                .when()
+                .head("/categories/" + categoryId + "/projects");
+        assertEquals(200, response.getStatusCode());
+        assertTrue(response.contentType().contains(ContentType.JSON.toString()));
+    }
+
+    // ------ The endpoints below will be tested during the interoperability testing ------
+    // /categories/:id/todos/:id
+    // POST /categories/:id/projects
+    // /categories/:id/projects/:id
 
     // ---------------- Additional Unit Test Considerations ----------------
 
@@ -263,6 +314,5 @@ public class CategoryTest {
         Response response = delete("/categories/" + categoryId);
         assertEquals(404, response.getStatusCode());
     }
-
 
 }
