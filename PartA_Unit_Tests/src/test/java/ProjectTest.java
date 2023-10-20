@@ -118,12 +118,23 @@ public class ProjectTest {
         projectData.put("title", "Updated Project");
         projectData.put("description", "Updated description");
 
-        Response response = given()
+        Response updateResponse = given()
                 .pathParam("id", projectId)
                 .body(projectData)
                 .when()
                 .post("/projects/{id}");
-        assertEquals(200, response.getStatusCode());
+        assertEquals(200, updateResponse.getStatusCode());
+
+        // Fetch the updated project and validate
+        Response fetchResponse = given()
+                .pathParam("id", projectId)
+                .when()
+                .get("/projects/{id}");
+        String updatedTitle = fetchResponse.jsonPath().getString("title");
+        String updatedDescription = fetchResponse.jsonPath().getString("description");
+
+        assertEquals("Updated Project", updatedTitle);
+        assertEquals("Updated description", updatedDescription);
     }
 
     @Test
@@ -132,12 +143,23 @@ public class ProjectTest {
         projectData.put("title", "Updated Project Again");
         projectData.put("description", "Updated description again");
 
-        Response response = given()
+        Response updateResponse = given()
                 .pathParam("id", projectId)
                 .body(projectData)
                 .when()
                 .put("/projects/{id}");
-        assertEquals(200, response.getStatusCode());
+        assertEquals(200, updateResponse.getStatusCode());
+
+        // Fetch the updated project and validate
+        Response fetchResponse = given()
+                .pathParam("id", projectId)
+                .when()
+                .get("/projects/{id}");
+        String updatedTitle = fetchResponse.jsonPath().getString("title");
+        String updatedDescription = fetchResponse.jsonPath().getString("description");
+
+        assertEquals("Updated Project Again", updatedTitle);
+        assertEquals("Updated description again", updatedDescription);
     }
 
     @Test
