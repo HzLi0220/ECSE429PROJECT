@@ -236,17 +236,13 @@ public class CategoryTest {
     }
 
     @Test
-    void testDeleteCategoryById() { // TOFIX: although the object does get deleted, the status code is 400 instead of 200
+    void testDeleteCategoryById() {
         Response response = given()
                 .pathParam("id", categoryId)
                 .when()
                 .delete("/categories/{id}");
-        System.out.println("when deleting the id is " + categoryId);
-        System.out.println("is mock object already deleted?" + categoryDeleted);
-
+        categoryDeleted = true;
         assertTrue(response.getStatusCode() == 200 || response.getStatusCode() == 204);
-        String responseBody = response.getBody().asString();
-        System.out.println("Response Body: " + responseBody);
         assertEquals("", response.getBody().asString());
 
     }
