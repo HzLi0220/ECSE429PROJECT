@@ -130,8 +130,8 @@ public class ProjectTest {
                 .pathParam("id", projectId)
                 .when()
                 .get("/projects/{id}");
-        String updatedTitle = fetchResponse.jsonPath().getString("title");
-        String updatedDescription = fetchResponse.jsonPath().getString("description");
+        String updatedTitle = fetchResponse.jsonPath().getString("projects[0].title");
+        String updatedDescription = fetchResponse.jsonPath().getString("projects[0].description");
 
         assertEquals("Updated Project", updatedTitle);
         assertEquals("Updated description", updatedDescription);
@@ -155,8 +155,8 @@ public class ProjectTest {
                 .pathParam("id", projectId)
                 .when()
                 .get("/projects/{id}");
-        String updatedTitle = fetchResponse.jsonPath().getString("title");
-        String updatedDescription = fetchResponse.jsonPath().getString("description");
+        String updatedTitle = fetchResponse.jsonPath().getString("projects[0].title");
+        String updatedDescription = fetchResponse.jsonPath().getString("projects[0].description");
 
         assertEquals("Updated Project Again", updatedTitle);
         assertEquals("Updated description again", updatedDescription);
