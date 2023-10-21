@@ -5,16 +5,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
@@ -163,16 +153,15 @@ public class TodoTest {
 
     @Test
     void testCreateTodoWithXmlBody() {
-        Map<String, String> todoDataXml = new HashMap<>();
-        todoDataXml.put("title", TODO_TITLE);
-        todoDataXml.put("description", TODO_DESCRIPTION);
-
-        String todoXml = convertMapToXml(todoDataXml);
+        String xmlBody = "<todo>"
+                + "<title> " + TODO_TITLE + " </title>"
+                + "<description> " + TODO_DESCRIPTION + " </description>"
+                + "</todo>";
 
         Response response = given()
                 .when()
                 .contentType("application/xml")
-                .body(todoXml)
+                .body(xmlBody)
                 .post("/todos");
 
         assertEquals(201, response.getStatusCode());
@@ -186,33 +175,6 @@ public class TodoTest {
                 .when()
                 .delete("/todos/{id}");
         assertEquals(200, response.getStatusCode());
-    }
-
-    // Utility method to convert a Map to XML
-    private String convertMapToXml(Map<String, String> data) {
-        try {
-            DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
-            Document document = documentBuilder.newDocument();
-
-            Element root = document.createElement("todo");
-            document.appendChild(root);
-
-            for (Map.Entry<String, String> entry : data.entrySet()) {
-                Element element = document.createElement(entry.getKey());
-                element.appendChild(document.createTextNode(entry.getValue()));
-                root.appendChild(element);
-            }
-
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            Transformer transformer = transformerFactory.newTransformer();
-            StringWriter writer = new StringWriter();
-            transformer.transform(new DOMSource(document), new StreamResult(writer));
-
-            return writer.toString();
-        } catch (Exception e) {
-            throw new RuntimeException("Error converting Map to XML", e);
-        }
     }
 
     @Test
