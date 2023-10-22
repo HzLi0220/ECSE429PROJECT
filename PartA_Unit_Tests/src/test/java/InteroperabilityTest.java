@@ -45,8 +45,8 @@ public class InteroperabilityTest {
             Response response = given()
                     .pathParam("id", testCategory.get("id"))
                     .when()
-                    .get("/projects/{id}");
-            testCategory.putAll(response.jsonPath().getMap(""));
+                    .get("/categories/{id}");
+            testCategory.putAll(response.jsonPath().getMap("categories[0]"));
         }
     }
     @BeforeAll
@@ -148,23 +148,6 @@ public class InteroperabilityTest {
         assertEquals(((ArrayList<Map>)testTodo.get("tasksof")).get(0).get("id"),testProject.get("id")); // check on todo's side
         assertEquals(((ArrayList<Map>)testProject.get("tasks")).get(0).get("id"),testTodo.get("id")); // check on project's side
     }
-    @Test
-    void testCreateBidirectionalRelationshipProjectTodo()
-    {
-        //creating project-todo relationship
-        Response response = given()
-                .contentType("application/json")
-                .body(testTodo)
-                .pathParam("id", testProject.get("id"))
-                .when()
-                .post("/projects/{id}/tasks");
-        assertEquals(201,response.getStatusCode());
-        //validating
-        updateTestVariables();
-        // we check on both sides since its a bidirectional relationship
-        assertEquals(((ArrayList<Map>)testTodo.get("tasksof")).get(0).get("id"),testProject.get("id")); // check on todo's side
-        assertEquals(((ArrayList<Map>)testProject.get("tasks")).get(0).get("id"),testTodo.get("id")); // check on project's side
-    }
 
     @Test
     void testDeleteBidirectionalRelationshipTodoProject()
@@ -193,6 +176,89 @@ public class InteroperabilityTest {
         assertNull(testProject.get("tasks")); // check on project's side
     }
     @Test
+    void testGetBidirectionalRelationshipTodoProject()
+    {
+        //getting relationships of invalid id
+        int invalidId = 600;
+        Response response = given()
+                .contentType("application/json")
+                .pathParam("id", invalidId)
+                .when()
+                .get("/todos/{id}/tasksof");
+        assertEquals(404,response.getStatusCode());
+        //validating the response even though it should give 404
+        assertEquals(0,response.jsonPath().getList("projects").size()); // no relationships
+
+        //getting relationships when there are none
+        response = given()
+                .contentType("application/json")
+                .pathParam("id", testTodo.get("id"))
+                .when()
+                .get("/todos/{id}/tasksof");
+        assertEquals(200,response.getStatusCode());
+        //validating the response
+        assertEquals(0,response.jsonPath().getList("projects").size()); // no relationships
+
+
+        //creating project-todo relationship
+        response = given()
+                .contentType("application/json")
+                .body(testTodo)
+                .pathParam("id", testProject.get("id"))
+                .when()
+                .post("/projects/{id}/tasks");
+        assertEquals(201,response.getStatusCode());
+
+        //getting it
+        response = given()
+                .contentType("application/json")
+                .pathParam("id", testTodo.get("id"))
+                .when()
+                .get("/todos/{id}/tasksof");
+        assertEquals(200,response.getStatusCode());
+        //validating the response
+        assertEquals(1,response.jsonPath().getList("projects").size()); // no relationships
+    }
+
+    @Test
+    void testHeadBidirectionalRelationshipTodoProject()
+    {
+        //getting relationships of invalid id
+        int invalidId = 600;
+        Response response = given()
+                .contentType("application/json")
+                .pathParam("id", invalidId)
+                .when()
+                .head("/todos/{id}/tasksof");
+        assertEquals(404,response.getStatusCode());
+
+        // getting relationships (doesnt matter if there are any or not since its just for the headers)
+        response = given()
+                .contentType("application/json")
+                .pathParam("id", testTodo.get("id"))
+                .when()
+                .head("/todos/{id}/tasksof");
+        assertEquals(200,response.getStatusCode());
+
+    }
+    @Test
+    void testCreateBidirectionalRelationshipProjectTodo()
+    {
+        //creating project-todo relationship
+        Response response = given()
+                .contentType("application/json")
+                .body(testTodo)
+                .pathParam("id", testProject.get("id"))
+                .when()
+                .post("/projects/{id}/tasks");
+        assertEquals(201,response.getStatusCode());
+        //validating
+        updateTestVariables();
+        // we check on both sides since its a bidirectional relationship
+        assertEquals(((ArrayList<Map>)testTodo.get("tasksof")).get(0).get("id"),testProject.get("id")); // check on todo's side
+        assertEquals(((ArrayList<Map>)testProject.get("tasks")).get(0).get("id"),testTodo.get("id")); // check on project's side
+    }
+    @Test
     void testDeleteBidirectionalRelationshipProjectTodo()
     {
         //creating project-todo relationship
@@ -218,7 +284,499 @@ public class InteroperabilityTest {
         assertNull(testTodo.get("tasksof")); // check on todo's side
         assertNull(testProject.get("tasks")); // check on project's side
     }
+    @Test
+    void testGetBidirectionalRelationshipProjectTodo()
+    {
+        //getting relationships of invalid id
+        int invalidId = 600;
+        Response response = given()
+                .contentType("application/json")
+                .pathParam("id", invalidId)
+                .when()
+                .get("/projects/{id}/tasks");
+        assertEquals(404,response.getStatusCode());
+        //validating the response even though it should give 404
+        assertEquals(0,response.jsonPath().getList("tasks").size()); // no relationships
+
+        //getting relationships when there are none
+        response = given()
+                .contentType("application/json")
+                .pathParam("id", testProject.get("id"))
+                .when()
+                .get("/projects/{id}/tasks");
+        assertEquals(200,response.getStatusCode());
+        //validating the response
+        assertEquals(0,response.jsonPath().getList("todos").size()); // no relationships
 
 
+        //creating project-todo relationship
+        response = given()
+                .contentType("application/json")
+                .body(testTodo)
+                .pathParam("id", testProject.get("id"))
+                .when()
+                .post("/projects/{id}/tasks");
+        assertEquals(201,response.getStatusCode());
 
+        //getting it
+        response = given()
+                .contentType("application/json")
+                .pathParam("id", testProject.get("id"))
+                .when()
+                .get("/projects/{id}/tasks");
+        assertEquals(200,response.getStatusCode());
+        //validating the response
+        assertEquals(1,response.jsonPath().getList("todos").size()); // no relationships
+    }
+
+    @Test
+    void testHeadBidirectionalRelationshipProjectTodo()
+    {
+        //getting relationships of invalid id
+        int invalidId = 600;
+        Response response = given()
+                .contentType("application/json")
+                .pathParam("id", invalidId)
+                .when()
+                .head("/projects/{id}/tasks");
+        assertEquals(404,response.getStatusCode());
+
+        // getting relationships (doesnt matter if there are any or not since its just for the headers)
+        response = given()
+                .contentType("application/json")
+                .pathParam("id", testProject.get("id"))
+                .when()
+                .head("/projects/{id}/tasks");
+        assertEquals(200,response.getStatusCode());
+    }
+    @Test
+    void testCreateUnidirectionalRelationshipTodoCategory()
+    {
+        //creating todo-category relationship
+        Response response = given()
+                .contentType("application/json")
+                .body(testCategory)
+                .pathParam("id", testTodo.get("id"))
+                .when()
+                .post("/todos/{id}/categories");
+        assertEquals(201,response.getStatusCode());
+        //validating
+        updateTestVariables();
+        // we check on one side only since its unidirectional
+        assertEquals(((ArrayList<Map>)testTodo.get("categories")).get(0).get("id"),testCategory.get("id")); // check on todo's side
+    }
+
+    @Test
+    void testDeleteUnidirectionalRelationshipTodoCategory()
+    {
+        //creating todo-category relationship
+        Response response = given()
+                .contentType("application/json")
+                .body(testCategory)
+                .pathParam("id", testTodo.get("id"))
+                .when()
+                .post("/todos/{id}/categories");
+        assertEquals(201,response.getStatusCode());
+
+        //deleting it
+        response = given()
+                .contentType("application/json")
+                .pathParam("id", testTodo.get("id"))
+                .pathParam("id2", testCategory.get("id"))
+                .when()
+                .delete("/todos/{id}/categories/{id2}");
+        assertEquals(200,response.getStatusCode());
+        //validating
+        updateTestVariables();
+        // we check on one side only since its unidirectional
+        assertNull(testTodo.get("categories")); // check on todo's side
+    }
+    @Test
+    void testGetUnidirectionalRelationshipTodoCategory()
+    {
+        //getting relationships of invalid id
+        int invalidId = 600;
+        Response response = given()
+                .contentType("application/json")
+                .pathParam("id", invalidId)
+                .when()
+                .get("/todos/{id}/categories");
+        assertEquals(404,response.getStatusCode());
+        //validating the response even though it should give 404
+        assertEquals(0,response.jsonPath().getList("categories").size()); // no relationships
+
+        //getting relationships when there are none
+        response = given()
+                .contentType("application/json")
+                .pathParam("id", testTodo.get("id"))
+                .when()
+                .get("/todos/{id}/categories");
+        assertEquals(200,response.getStatusCode());
+        //validating the response
+        assertEquals(0,response.jsonPath().getList("categories").size()); // no relationships
+
+
+        //creating todo-category relationship
+        response = given()
+                .contentType("application/json")
+                .body(testCategory)
+                .pathParam("id", testTodo.get("id"))
+                .when()
+                .post("/todos/{id}/categories");
+        assertEquals(201,response.getStatusCode());
+
+        //getting it
+        response = given()
+                .contentType("application/json")
+                .pathParam("id", testTodo.get("id"))
+                .when()
+                .get("/todos/{id}/categories");
+        assertEquals(200,response.getStatusCode());
+        //validating the response
+        assertEquals(1,response.jsonPath().getList("categories").size()); // no relationships
+    }
+
+    @Test
+    void testHeadUnidirectionalRelationshipTodoCategory()
+    {
+        //getting relationships of invalid id
+        int invalidId = 600;
+        Response response = given()
+                .contentType("application/json")
+                .pathParam("id", invalidId)
+                .when()
+                .head("/todos/{id}/categories");
+        assertEquals(404,response.getStatusCode());
+
+        // getting relationships (doesnt matter if there are any or not since its just for the headers)
+        response = given()
+                .contentType("application/json")
+                .pathParam("id", testTodo.get("id"))
+                .when()
+                .head("/todos/{id}/categories");
+        assertEquals(200,response.getStatusCode());
+
+    }
+    @Test
+    void testCreateUnidirectionalRelationshipCategoryTodo()
+    {
+        //creating category-todo relationship
+        Response response = given()
+                .contentType("application/json")
+                .body(testTodo)
+                .pathParam("id", testCategory.get("id"))
+                .when()
+                .post("/categories/{id}/todos");
+        assertEquals(201,response.getStatusCode());
+        //validating
+        updateTestVariables();
+        // we check on one side only since its unidirectional
+        assertEquals(((ArrayList<Map>)testCategory.get("todos")).get(0).get("id"),testTodo.get("id")); // check on category's side
+    }
+    @Test
+    void testDeleteUnidirectionalRelationshipCategoryTodo()
+    {
+        //creating category-todo relationship
+        Response response = given()
+                .contentType("application/json")
+                .body(testTodo)
+                .pathParam("id", testCategory.get("id"))
+                .when()
+                .post("/categories/{id}/todos");
+        assertEquals(201,response.getStatusCode());
+
+        //deleting it
+        response = given()
+                .contentType("application/json")
+                .pathParam("id", testCategory.get("id"))
+                .pathParam("id2", testTodo.get("id"))
+                .when()
+                .delete("/categories/{id}/todos/{id2}");
+        assertEquals(200,response.getStatusCode());
+        //validating
+        updateTestVariables();
+        // we check on one side only since its unidirectional
+        assertNull(testCategory.get("todos")); // check on category's side
+    }
+    @Test
+    void testGetUnidirectionalRelationshipCategoryTodo()
+    {
+        //getting relationships of invalid id
+        int invalidId = 600;
+        Response response = given()
+                .contentType("application/json")
+                .pathParam("id", invalidId)
+                .when()
+                .get("/categories/{id}/todos");
+        assertEquals(404,response.getStatusCode());
+        //validating the response even though it should give 404
+        assertEquals(0,response.jsonPath().getList("todos").size()); // no relationships
+
+        //getting relationships when there are none
+        response = given()
+                .contentType("application/json")
+                .pathParam("id", testCategory.get("id"))
+                .when()
+                .get("/categories/{id}/todos");
+        assertEquals(200,response.getStatusCode());
+        //validating the response
+        assertEquals(0,response.jsonPath().getList("todos").size()); // no relationships
+
+
+        //creating category-todo relationship
+        response = given()
+                .contentType("application/json")
+                .body(testTodo)
+                .pathParam("id", testCategory.get("id"))
+                .when()
+                .post("/categories/{id}/todos");
+        assertEquals(201,response.getStatusCode());
+
+        //getting it
+        response = given()
+                .contentType("application/json")
+                .pathParam("id", testCategory.get("id"))
+                .when()
+                .get("/categories/{id}/todos");
+        assertEquals(200,response.getStatusCode());
+        //validating the response
+        assertEquals(1,response.jsonPath().getList("todos").size()); // no relationships
+    }
+
+    @Test
+    void testHeadBidirectionalRelationshipCategoryTodo()
+    {
+        //getting relationships of invalid id
+        int invalidId = 600;
+        Response response = given()
+                .contentType("application/json")
+                .pathParam("id", invalidId)
+                .when()
+                .head("/categories/{id}/todos");
+        assertEquals(404,response.getStatusCode());
+
+        // getting relationships (doesnt matter if there are any or not since its just for the headers)
+        response = given()
+                .contentType("application/json")
+                .pathParam("id", testCategory.get("id"))
+                .when()
+                .head("/categories/{id}/todos");
+        assertEquals(200,response.getStatusCode());
+    }
+    @Test
+    void testCreateUnidirectionalRelationshipProjectCategory()
+    {
+        //creating todo-category relationship
+        Response response = given()
+                .contentType("application/json")
+                .body(testCategory)
+                .pathParam("id", testProject.get("id"))
+                .when()
+                .post("/projects/{id}/categories");
+        assertEquals(201,response.getStatusCode());
+        //validating
+        updateTestVariables();
+        // we check on one side only since its unidirectional
+        assertEquals(((ArrayList<Map>)testProject.get("categories")).get(0).get("id"),testCategory.get("id")); // check on projects
+    }
+
+    @Test
+    void testDeleteUnidirectionalRelationshipProjectCategory()
+    {
+        //creating todo-category relationship
+        Response response = given()
+                .contentType("application/json")
+                .body(testCategory)
+                .pathParam("id", testProject.get("id"))
+                .when()
+                .post("/projects/{id}/categories");
+        assertEquals(201,response.getStatusCode());
+
+        //deleting it
+        response = given()
+                .contentType("application/json")
+                .pathParam("id", testProject.get("id"))
+                .pathParam("id2", testCategory.get("id"))
+                .when()
+                .delete("/projects/{id}/categories/{id2}");
+        assertEquals(200,response.getStatusCode());
+        //validating
+        updateTestVariables();
+        // we check on one side only since its unidirectional
+        assertNull(testProject.get("categories")); // check on projects side
+    }
+    @Test
+    void testGetUnidirectionalRelationshipProjectCategory()
+    {
+        //getting relationships of invalid id
+        int invalidId = 600;
+        Response response = given()
+                .contentType("application/json")
+                .pathParam("id", invalidId)
+                .when()
+                .get("/projects/{id}/categories");
+        assertEquals(404,response.getStatusCode());
+        //validating the response even though it should give 404
+        assertEquals(0,response.jsonPath().getList("categories").size()); // no relationships
+
+        //getting relationships when there are none
+        response = given()
+                .contentType("application/json")
+                .pathParam("id", testProject.get("id"))
+                .when()
+                .get("/projects/{id}/categories");
+        assertEquals(200,response.getStatusCode());
+        //validating the response
+        assertEquals(0,response.jsonPath().getList("categories").size()); // no relationships
+
+
+        //creating todo-category relationship
+        response = given()
+                .contentType("application/json")
+                .body(testCategory)
+                .pathParam("id", testProject.get("id"))
+                .when()
+                .post("/projects/{id}/categories");
+        assertEquals(201,response.getStatusCode());
+
+        //getting it
+        response = given()
+                .contentType("application/json")
+                .pathParam("id", testProject.get("id"))
+                .when()
+                .get("/projects/{id}/categories");
+        assertEquals(200,response.getStatusCode());
+        //validating the response
+        assertEquals(1,response.jsonPath().getList("categories").size()); // no relationships
+    }
+
+    @Test
+    void testHeadUnidirectionalRelationshipProjectCategory()
+    {
+        //getting relationships of invalid id
+        int invalidId = 600;
+        Response response = given()
+                .contentType("application/json")
+                .pathParam("id", invalidId)
+                .when()
+                .head("/projects/{id}/categories");
+        assertEquals(404,response.getStatusCode());
+
+        // getting relationships (doesnt matter if there are any or not since its just for the headers)
+        response = given()
+                .contentType("application/json")
+                .pathParam("id", testProject.get("id"))
+                .when()
+                .head("/projects/{id}/categories");
+        assertEquals(200,response.getStatusCode());
+
+    }
+
+    // THE FOLLOWING ENDPOINTS CONTRADICT THE RELATIONSHIP MODEL IN THE API DOCUMENTATION, BUT WE ARE STILL TESTING THEM FOR VERIFICATION PURPOSES
+    @Test
+    void testCreateUnidirectionalRelationshipCategoryProject()
+    {
+        //creating category-todo relationship
+        Response response = given()
+                .contentType("application/json")
+                .body(testProject)
+                .pathParam("id", testCategory.get("id"))
+                .when()
+                .post("/categories/{id}/projects");
+        assertEquals(201,response.getStatusCode());
+        //validating
+        updateTestVariables();
+        // we check on one side only since its unidirectional
+        assertEquals(((ArrayList<Map>)testCategory.get("projects")).get(0).get("id"),testProject.get("id")); // check on category's side
+    }
+    @Test
+    void testDeleteUnidirectionalRelationshipCategoryProject()
+    {
+        //creating category-todo relationship
+        Response response = given()
+                .contentType("application/json")
+                .body(testProject)
+                .pathParam("id", testCategory.get("id"))
+                .when()
+                .post("/categories/{id}/projects");
+        assertEquals(201,response.getStatusCode());
+
+        //deleting it
+        response = given()
+                .contentType("application/json")
+                .pathParam("id", testCategory.get("id"))
+                .pathParam("id2", testProject.get("id"))
+                .when()
+                .delete("/categories/{id}/projects/{id2}");
+        assertEquals(200,response.getStatusCode());
+        //validating
+        updateTestVariables();
+        // we check on one side only since its unidirectional
+        assertNull(testCategory.get("projects")); // check on category's side
+    }
+    @Test
+    void testGetUnidirectionalRelationshipCategoryProject()
+    {
+        //getting relationships of invalid id
+        int invalidId = 600;
+        Response response = given()
+                .contentType("application/json")
+                .pathParam("id", invalidId)
+                .when()
+                .get("/categories/{id}/projects");
+        assertEquals(404,response.getStatusCode());
+        //validating the response even though it should give 404
+        assertEquals(0,response.jsonPath().getList("projects").size()); // no relationships
+
+        //getting relationships when there are none
+        response = given()
+                .contentType("application/json")
+                .pathParam("id", testCategory.get("id"))
+                .when()
+                .get("/categories/{id}/projects");
+        assertEquals(200,response.getStatusCode());
+        //validating the response
+        assertEquals(0,response.jsonPath().getList("projects").size()); // no relationships
+
+
+        //creating category-todo relationship
+        response = given()
+                .contentType("application/json")
+                .body(testProject)
+                .pathParam("id", testCategory.get("id"))
+                .when()
+                .post("/categories/{id}/projects");
+        assertEquals(201,response.getStatusCode());
+
+        //getting it
+        response = given()
+                .contentType("application/json")
+                .pathParam("id", testCategory.get("id"))
+                .when()
+                .get("/categories/{id}/projects");
+        assertEquals(200,response.getStatusCode());
+        //validating the response
+        assertEquals(1,response.jsonPath().getList("projects").size()); // no relationships
+    }
+
+    @Test
+    void testHeadBidirectionalRelationshipCategoryProject()
+    {
+        //getting relationships of invalid id
+        int invalidId = 600;
+        Response response = given()
+                .contentType("application/json")
+                .pathParam("id", invalidId)
+                .when()
+                .head("/categories/{id}/projects");
+        assertEquals(404,response.getStatusCode());
+
+        // getting relationships (doesnt matter if there are any or not since its just for the headers)
+        response = given()
+                .contentType("application/json")
+                .pathParam("id", testCategory.get("id"))
+                .when()
+                .head("/categories/{id}/projects");
+        assertEquals(200,response.getStatusCode());
+    }
 }
