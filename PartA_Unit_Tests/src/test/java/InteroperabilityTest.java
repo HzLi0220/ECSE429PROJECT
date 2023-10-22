@@ -13,9 +13,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.MethodOrderer.Random;
 
-/**
- * @author Moncef Amchech
- */
 @TestMethodOrder(Random.class)
 public class InteroperabilityTest {
     HashMap<String,Object> testProject;
@@ -134,8 +131,16 @@ public class InteroperabilityTest {
     @Test
     void testCreateBidirectionalRelationshipTodoProject()
     {
-        //creating todo-project relationship
+        //creating todo-project relationship with invalid id
         Response response = given()
+                .contentType("application/json")
+                .body(testProject)
+                .pathParam("id", 4567)
+                .when()
+                .post("/todos/{id}/tasksof");
+        assertEquals(404,response.getStatusCode());
+        //creating todo-project relationship
+        response = given()
                 .contentType("application/json")
                 .body(testProject)
                 .pathParam("id", testTodo.get("id"))
@@ -152,8 +157,16 @@ public class InteroperabilityTest {
     @Test
     void testDeleteBidirectionalRelationshipTodoProject()
     {
-        //creating project-todo relationship
+        //deleting project-todo relationship with invalid id
         Response response = given()
+                .contentType("application/json")
+                .pathParam("id", 2344)
+                .pathParam("id2", 4555)
+                .when()
+                .delete("/todos/{id}/tasksof/{id2}");
+        assertEquals(404,response.getStatusCode());
+        //creating project-todo relationship
+        response = given()
                 .contentType("application/json")
                 .body(testTodo)
                 .pathParam("id", testProject.get("id"))
@@ -244,8 +257,16 @@ public class InteroperabilityTest {
     @Test
     void testCreateBidirectionalRelationshipProjectTodo()
     {
-        //creating project-todo relationship
+        //creating project-todo relationship with invalid id
         Response response = given()
+                .contentType("application/json")
+                .body(testTodo)
+                .pathParam("id", 3245)
+                .when()
+                .post("/projects/{id}/tasks");
+        assertEquals(404,response.getStatusCode());
+        //creating project-todo relationship
+        response = given()
                 .contentType("application/json")
                 .body(testTodo)
                 .pathParam("id", testProject.get("id"))
@@ -261,8 +282,16 @@ public class InteroperabilityTest {
     @Test
     void testDeleteBidirectionalRelationshipProjectTodo()
     {
-        //creating project-todo relationship
+        //deleting project-todo relationship with invalid id
         Response response = given()
+                .contentType("application/json")
+                .pathParam("id", 2344)
+                .pathParam("id2", 2344)
+                .when()
+                .delete("/projects/{id}/tasks/{id2}");
+        assertEquals(404,response.getStatusCode());
+        //creating project-todo relationship
+        response = given()
                 .contentType("application/json")
                 .body(testTodo)
                 .pathParam("id", testProject.get("id"))
@@ -352,8 +381,16 @@ public class InteroperabilityTest {
     @Test
     void testCreateUnidirectionalRelationshipTodoCategory()
     {
-        //creating todo-category relationship
+        //creating todo-category relationship with invalid id
         Response response = given()
+                .contentType("application/json")
+                .body(testCategory)
+                .pathParam("id", 2342)
+                .when()
+                .post("/todos/{id}/categories");
+        assertEquals(404,response.getStatusCode());
+        //creating todo-category relationship
+        response = given()
                 .contentType("application/json")
                 .body(testCategory)
                 .pathParam("id", testTodo.get("id"))
@@ -369,8 +406,16 @@ public class InteroperabilityTest {
     @Test
     void testDeleteUnidirectionalRelationshipTodoCategory()
     {
-        //creating todo-category relationship
+        //deleting todo-category relationship with invalid id
         Response response = given()
+                .contentType("application/json")
+                .pathParam("id", 3245)
+                .pathParam("id2", 3455)
+                .when()
+                .delete("/todos/{id}/categories/{id2}");
+        assertEquals(404,response.getStatusCode());
+        //creating todo-category relationship
+        response = given()
                 .contentType("application/json")
                 .body(testCategory)
                 .pathParam("id", testTodo.get("id"))
@@ -460,8 +505,16 @@ public class InteroperabilityTest {
     @Test
     void testCreateUnidirectionalRelationshipCategoryTodo()
     {
-        //creating category-todo relationship
+        //creating category-todo relationship with invalid id
         Response response = given()
+                .contentType("application/json")
+                .body(testTodo)
+                .pathParam("id", 1233)
+                .when()
+                .post("/categories/{id}/todos");
+        assertEquals(404,response.getStatusCode());
+        //creating category-todo relationship
+        response = given()
                 .contentType("application/json")
                 .body(testTodo)
                 .pathParam("id", testCategory.get("id"))
@@ -476,8 +529,16 @@ public class InteroperabilityTest {
     @Test
     void testDeleteUnidirectionalRelationshipCategoryTodo()
     {
-        //creating category-todo relationship
+        //deleting category-todo relationship with invalid id
         Response response = given()
+                .contentType("application/json")
+                .pathParam("id", 2344)
+                .pathParam("id2", 3455)
+                .when()
+                .delete("/categories/{id}/todos/{id2}");
+        assertEquals(404,response.getStatusCode());
+        //creating category-todo relationship
+        response = given()
                 .contentType("application/json")
                 .body(testTodo)
                 .pathParam("id", testCategory.get("id"))
@@ -566,8 +627,16 @@ public class InteroperabilityTest {
     @Test
     void testCreateUnidirectionalRelationshipProjectCategory()
     {
-        //creating todo-category relationship
+        //creating project-category relationship with invalid id
         Response response = given()
+                .contentType("application/json")
+                .body(testCategory)
+                .pathParam("id", 3455)
+                .when()
+                .post("/projects/{id}/categories");
+        assertEquals(404,response.getStatusCode());
+        //creating project-category relationship
+        response = given()
                 .contentType("application/json")
                 .body(testCategory)
                 .pathParam("id", testProject.get("id"))
@@ -577,14 +646,22 @@ public class InteroperabilityTest {
         //validating
         updateTestVariables();
         // we check on one side only since its unidirectional
-        assertEquals(((ArrayList<Map>)testProject.get("categories")).get(0).get("id"),testCategory.get("id")); // check on projects
+        assertEquals(((ArrayList<Map>)testProject.get("categories")).get(0).get("id"),testCategory.get("id")); // check on projects side
     }
 
     @Test
     void testDeleteUnidirectionalRelationshipProjectCategory()
     {
-        //creating todo-category relationship
+        //deleting project-category relationship with invalid id
         Response response = given()
+                .contentType("application/json")
+                .pathParam("id", 3444)
+                .pathParam("id2", 4444)
+                .when()
+                .delete("/projects/{id}/categories/{id2}");
+        assertEquals(404,response.getStatusCode());
+        //creating project-category relationship
+        response = given()
                 .contentType("application/json")
                 .body(testCategory)
                 .pathParam("id", testProject.get("id"))
@@ -630,7 +707,7 @@ public class InteroperabilityTest {
         assertEquals(0,response.jsonPath().getList("categories").size()); // no relationships
 
 
-        //creating todo-category relationship
+        //creating project-category relationship
         response = given()
                 .contentType("application/json")
                 .body(testCategory)
@@ -676,8 +753,16 @@ public class InteroperabilityTest {
     @Test
     void testCreateUnidirectionalRelationshipCategoryProject()
     {
-        //creating category-todo relationship
+        //creating category-project relationship with invalid id
         Response response = given()
+                .contentType("application/json")
+                .body(testProject)
+                .pathParam("id", 4444)
+                .when()
+                .post("/categories/{id}/projects");
+        assertEquals(404,response.getStatusCode());
+        //creating category-project relationship
+        response = given()
                 .contentType("application/json")
                 .body(testProject)
                 .pathParam("id", testCategory.get("id"))
@@ -692,8 +777,16 @@ public class InteroperabilityTest {
     @Test
     void testDeleteUnidirectionalRelationshipCategoryProject()
     {
-        //creating category-todo relationship
+        //deleting category-project relationship with invalid ids
         Response response = given()
+                .contentType("application/json")
+                .pathParam("id", 4444)
+                .pathParam("id2", 5555)
+                .when()
+                .delete("/categories/{id}/projects/{id2}");
+        assertEquals(404,response.getStatusCode());
+        //creating category-project relationship
+        response = given()
                 .contentType("application/json")
                 .body(testProject)
                 .pathParam("id", testCategory.get("id"))
@@ -739,7 +832,7 @@ public class InteroperabilityTest {
         assertEquals(0,response.jsonPath().getList("projects").size()); // no relationships
 
 
-        //creating category-todo relationship
+        //creating category-project relationship
         response = given()
                 .contentType("application/json")
                 .body(testProject)
