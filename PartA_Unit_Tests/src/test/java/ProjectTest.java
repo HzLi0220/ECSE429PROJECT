@@ -33,18 +33,27 @@ public class ProjectTest {
 
     private int projectId;
     private boolean projectDeleted = false; // Tells Tear Down to not delete the project as the Test already done so.
+    
     private String mockTitle = "Test Project";
     private String mockDescription = "Description of the test project";
     private boolean mockCompleted = false;
+    
     private String mockUpdateTitle = "Updated Test Project";
     private String mockUpdateDescription = "Updated Description of the test project";
     private boolean mockUpdateCompleted = true;
 
+    /**
+     * Initial setup for the test class. Sets the base URL for RestAssured.
+     */
     @BeforeAll
     public static void initialSetup() {
         RestAssured.baseURI = "http://localhost:4567";
     }
 
+    
+    /**
+     * Tests if the server is running by making a GET request.
+     */
     @Test
     void testServerIsRunning() {
         projectDeleted = false;  // Reset the flag during setup
@@ -59,6 +68,10 @@ public class ProjectTest {
         }
     }
 
+    /**
+     * Setup method that is executed before each test.
+     * Creates a new project with mock data.
+     */
     @BeforeEach
     public void setUp() {
         // Create a project before each test
@@ -83,7 +96,11 @@ public class ProjectTest {
         assertEquals(mockDescription, response.jsonPath().getString("description"));
         assertEquals(String.valueOf(mockCompleted), response.jsonPath().getString("completed"));
     }
-
+    
+    /**
+     * Tear down method that is executed after each test.
+     * Deletes the project created during the setup.
+     */
     @AfterEach
     public void tearDown() {
         if (!projectDeleted) {
@@ -99,6 +116,9 @@ public class ProjectTest {
         }
     }
 
+    /**
+     * Tests fetching all projects.
+     */
     @Test
     void testGetAllProjects() {
         Response response = given()
@@ -107,6 +127,9 @@ public class ProjectTest {
         assertEquals(200, response.getStatusCode());
     }
 
+    /**
+     * Tests fetching all projects with a title filter.
+     */
     @Test
     void testGetAllProjectsWithFilter() {
         Response response = given()
@@ -119,6 +142,9 @@ public class ProjectTest {
         assertEquals(mockTitle, response.jsonPath().getString("projects[0].title"));
     }
 
+    /**
+     * Tests fetching headers of all projects.
+     */
     @Test
     void testGetProjectHeaders() {
         Response response = given()
@@ -127,6 +153,9 @@ public class ProjectTest {
         assertEquals(200, response.getStatusCode());
     }
 
+    /**
+     * Tests fetching a specific project by its ID.
+     */
     @Test
     void testGetSpecificProject() {
         Response response = given()
@@ -140,6 +169,9 @@ public class ProjectTest {
         assertEquals(mockDescription, response.jsonPath().getString("projects[0].description"));
     }
 
+    /**
+     * Tests fetching a specific project by its ID and expects an XML response.
+     */
     @Test
     public void testGetProjectByIdXML() {
         Response response = given()
@@ -167,6 +199,9 @@ public class ProjectTest {
         }
     }
 
+    /**
+     * Tests fetching headers of a specific project by its ID.
+     */
     @Test
     void testGetSpecificProjectHeaders() {
         Response response = given()
@@ -176,6 +211,9 @@ public class ProjectTest {
         assertEquals(200, response.getStatusCode());
     }
 
+    /**
+     * Tests updating a specific project using POST request.
+     */
     @Test
     void testUpdateSpecificProjectUsingPOST() {
         Map<String, Object> projectData = new HashMap<>();
@@ -204,6 +242,9 @@ public class ProjectTest {
         assertEquals(String.valueOf(mockUpdateCompleted), updatedComplted);
     }
 
+    /**
+     * Tests updating a specific project using PUT request.
+     */
     @Test
     void testUpdateSpecificProjectUsingPUT() {
         Map<String, Object> projectData = new HashMap<>();
@@ -232,6 +273,9 @@ public class ProjectTest {
         assertEquals(String.valueOf(mockUpdateCompleted), updatedComplted);
     }
 
+    /**
+     * Tests posting a project with XML content without specifying an ID.
+     */
     @Test
     void testPostProjectAsXmlWithoutID() {
         String xmlBody = "<project>"
@@ -255,6 +299,9 @@ public class ProjectTest {
         assertEquals(200, deleteResponse.getStatusCode());
     }
 
+    /**
+     * Tests deleting a specific project by its ID.
+     */
     @Test
     void testDeleteSpecificProject() {
         Response response = given()
@@ -275,6 +322,9 @@ public class ProjectTest {
 
     // ---------------- Additional Unit Test Considerations ----------------
 
+    /**
+     * Tests the behavior when a malformed JSON payload is posted. 400 response is expected.
+     */
     @Test
     public void testMalformedJSONPayload() {
         String requestBody = "{Invalid JSON}";
@@ -284,6 +334,9 @@ public class ProjectTest {
         assertEquals(400, response.getStatusCode());
     }
 
+    /**
+     * Tests the behavior when a malformed XML payload is posted. 400 response is expected.
+     */
     @Test
     public void testMalformedXMLPayload() {
         String requestBody = "<Invalid XML>";
@@ -293,6 +346,9 @@ public class ProjectTest {
         assertEquals(400, response.getStatusCode());
     }
 
+    /**
+     * Tests deleting a project which does not exist. 404 response is expected.
+     */
     @Test
     public void testDeleteNonExistingProject() {
         int projectId = 1000;
@@ -303,6 +359,9 @@ public class ProjectTest {
         assertEquals(404, response.getStatusCode());
     }
 
+    /**
+     * Tests using PUT request with XML content without specifying an ID, which the PUT should not be allowed.
+     */
     @Test
     void testPutProjectAsXmlWithoutIDNotAllowed() {
         String xmlBody = "<project>"
@@ -317,6 +376,11 @@ public class ProjectTest {
         assertEquals(405, response.getStatusCode());
     }
 
+    /**
+     * Tests fetching projects with a non-existent filter.
+     * 200 is returned here with empty list.
+     * It may be a good idea to just returned 404 instead
+     */
     @Test
     void testFetchProjectsWithNonExistentFilter() {
         Response response = given()
@@ -329,6 +393,9 @@ public class ProjectTest {
         assertTrue(projects.isEmpty());
     }
 
+    /**
+     * Tests fetching headers for a non-existing project. 404 response is expected.
+     */
     @Test
     void testFetchHeadersForNonExistingProject() {
         Response response = given()
@@ -339,6 +406,9 @@ public class ProjectTest {
         assertEquals(404, response.getStatusCode());
     }
 
+    /**
+     * Tests fetching a non-existing project by its ID. 404 response is expected.
+     */
     @Test
     void testFetchNonExistingProject() {
         Response response = given()
