@@ -92,7 +92,6 @@ public class CategoryTest {
 
 
 // ------------------------------ /categories -------------------------------
-
     @Test
     void testGetAllCategories() {
         Response response = given()
@@ -174,7 +173,6 @@ public class CategoryTest {
     }
 
     // --------------------- /categories/:id --------------------
-
     @Test
     public void testGetCategoryByIdJSON() {
         Response response = given()
@@ -285,7 +283,6 @@ public class CategoryTest {
     }
 
     // --------------------- /categories/:id/todos ----------------------------
-
     @Test
     void testGetCategoryTodos() {
         Response response = given()
@@ -316,13 +313,7 @@ public class CategoryTest {
         assertTrue(response.contentType().contains(ContentType.JSON.toString()));
     }
 
-    // ------ The endpoints below will be tested during the interoperability testing ------
-    // /categories/:id/todos/:id
-    // POST /categories/:id/projects
-    // /categories/:id/projects/:id
-
     // ---------------- Additional Unit Test Considerations ----------------
-
     @Test
     public void testMalformedJSONPayload() {
         String requestBody = "{Invalid JSON}";
