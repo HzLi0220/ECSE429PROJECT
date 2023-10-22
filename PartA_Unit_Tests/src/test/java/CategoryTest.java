@@ -150,12 +150,14 @@ public class CategoryTest {
     void testGetFilteredCategories() {
         Response response = given()
                 .accept(ContentType.JSON)
-                .queryParam("title", "test filtered categories")
+                .queryParam("title", "Test Category")
                 .when()
                 .get("/categories");
         assertEquals(200, response.getStatusCode());
         assertTrue(response.contentType().contains(ContentType.JSON.toString()));
 
+        // Validate that the filtered project object indeed have the matching fields.
+        assertEquals("Test Category", response.jsonPath().getString("categories[0].title"));
     }
 
     // --------------------- /categories/:id/todos --------------------

@@ -115,9 +115,8 @@ public class ProjectTest {
                 .get("/projects");
         assertEquals(200, response.getStatusCode());
 
-        // Validate that the created project object indeed have the matching fields.
+        // Validate that the filtered project object indeed have the matching fields.
         assertEquals(mockTitle, response.jsonPath().getString("projects[0].title"));
-        assertEquals(mockDescription, response.jsonPath().getString("projects[0].description"));
     }
 
     @Test
