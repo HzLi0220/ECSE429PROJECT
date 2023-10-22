@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import static io.restassured.RestAssured.delete;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -312,6 +313,38 @@ public class CategoryTest {
     public void testDeleteNonExistingCategory() {
         int categoryId = 1000;
         Response response = delete("/categories/" + categoryId);
+        assertEquals(404, response.getStatusCode());
+    }
+
+    @Test
+    void testFetchCetegoryWithNonExistentFilter() {
+        Response response = given()
+                .queryParam("title", "non-existent-filter")
+                .when()
+                .get("/categories");
+
+        assertEquals(200, response.getStatusCode());
+        List<?> projects = response.jsonPath().getList("categories");
+        assertTrue(projects.isEmpty());
+    }
+
+    @Test
+    void testFetchHeadersForNonExistingCategory() {
+        Response response = given()
+                .pathParam("id", "non-existing-id")
+                .when()
+                .head("/categories/{id}");
+    
+        assertEquals(404, response.getStatusCode());
+    }
+
+    @Test
+    void testFetchNonExistingCategory() {
+        Response response = given()
+                .pathParam("id", "non-existing-id")
+                .when()
+                .get("/categories/{id}");
+
         assertEquals(404, response.getStatusCode());
     }
 

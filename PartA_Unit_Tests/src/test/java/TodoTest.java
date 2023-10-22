@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static io.restassured.RestAssured.given;
@@ -204,6 +205,28 @@ public class TodoTest {
                 .pathParam("id", UNLINKED_ID)
                 .when()
                 .head("/todos/{id}");
+        assertEquals(404, response.getStatusCode());
+    }
+
+    @Test
+    void testFetchTodoWithNonExistentFilter() {
+        Response response = given()
+                .queryParam("title", "non-existent-filter")
+                .when()
+                .get("/todos");
+
+        assertEquals(200, response.getStatusCode());
+        List<?> projects = response.jsonPath().getList("todos");
+        assertTrue(projects.isEmpty());
+    }
+
+    @Test
+    void testFetchHeadersForNonExistingTodo() {
+        Response response = given()
+                .pathParam("id", "non-existing-id")
+                .when()
+                .head("/todos/{id}");
+    
         assertEquals(404, response.getStatusCode());
     }
 }
