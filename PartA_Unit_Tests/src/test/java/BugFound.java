@@ -120,7 +120,150 @@ public class BugFound {
                 .put("/todos/{id}");
         assertEquals(200, response.getStatusCode());
     }
-
+    @Test
+    void testGetBidirectionalRelationshipTodoProjectWithInvalidId() {
+        //getting relationships of invalid id
+        int invalidId = 600;
+        Response response = given()
+                .contentType("application/json")
+                .pathParam("id", invalidId)
+                .when()
+                .get("/todos/{id}/tasksof");
+        assertEquals(404, response.getStatusCode());
+        //validating the response even though it should give 404
+        assertEquals(0, response.jsonPath().getList("projects").size()); // no relationships
+    }
+    @Test
+    void testHeadBidirectionalRelationshipTodoProjectWithInvalidId() {
+        //getting relationships of invalid id
+        int invalidId = 600;
+        Response response = given()
+                .contentType("application/json")
+                .pathParam("id", invalidId)
+                .when()
+                .head("/todos/{id}/tasksof");
+        assertEquals(404, response.getStatusCode());
+    }
+    @Test
+    void testGetBidirectionalRelationshipProjectTodoWithInvalidId() {
+        //getting relationships of invalid id
+        int invalidId = 600;
+        Response response = given()
+                .contentType("application/json")
+                .pathParam("id", invalidId)
+                .when()
+                .get("/projects/{id}/tasks");
+        assertEquals(404, response.getStatusCode());
+        //validating the response even though it should give 404
+        assertEquals(0, response.jsonPath().getList("tasks").size()); // no relationships
+    }
+    @Test
+    void testHeadBidirectionalRelationshipProjectTodoWithInvalidId() {
+        //getting relationships of invalid id
+        int invalidId = 600;
+        Response response = given()
+                .contentType("application/json")
+                .pathParam("id", invalidId)
+                .when()
+                .head("/projects/{id}/tasks");
+        assertEquals(404, response.getStatusCode());
+    }
+    @Test
+    void testGetUnidirectionalRelationshipTodoCategoryWithInvalidId() {
+        //getting relationships of invalid id
+        int invalidId = 600;
+        Response response = given()
+                .contentType("application/json")
+                .pathParam("id", invalidId)
+                .when()
+                .get("/todos/{id}/categories");
+        assertEquals(404, response.getStatusCode());
+        //validating the response even though it should give 404
+        assertEquals(0, response.jsonPath().getList("categories").size()); // no relationships
+    }
+    @Test
+    void testHeadUnidirectionalRelationshipTodoCategoryWithInvalidId() {
+        //getting relationships of invalid id
+        int invalidId = 600;
+        Response response = given()
+                .contentType("application/json")
+                .pathParam("id", invalidId)
+                .when()
+                .head("/todos/{id}/categories");
+        assertEquals(404, response.getStatusCode());
+    }
+    @Test
+    void testGetUnidirectionalRelationshipCategoryTodoWithInvalidId() {
+        //getting relationships of invalid id
+        int invalidId = 600;
+        Response response = given()
+                .contentType("application/json")
+                .pathParam("id", invalidId)
+                .when()
+                .get("/categories/{id}/todos");
+        assertEquals(404, response.getStatusCode());
+        //validating the response even though it should give 404
+        assertEquals(0, response.jsonPath().getList("todos").size()); // no relationships
+    }
+    @Test
+    void testHeadBidirectionalRelationshipCategoryTodoWithInvalidId() {
+        //getting relationships of invalid id
+        int invalidId = 600;
+        Response response = given()
+                .contentType("application/json")
+                .pathParam("id", invalidId)
+                .when()
+                .head("/categories/{id}/todos");
+        assertEquals(404, response.getStatusCode());
+    }
+    @Test
+    void testGetUnidirectionalRelationshipProjectCategoryWithInvalidId() {
+        //getting relationships of invalid id
+        int invalidId = 600;
+        Response response = given()
+                .contentType("application/json")
+                .pathParam("id", invalidId)
+                .when()
+                .get("/projects/{id}/categories");
+        assertEquals(404, response.getStatusCode());
+        //validating the response even though it should give 404
+        assertEquals(0, response.jsonPath().getList("categories").size()); // no relationships
+    }
+    @Test
+    void testHeadUnidirectionalRelationshipProjectCategoryWithInvalidId() {
+        //getting relationships of invalid id
+        int invalidId = 600;
+        Response response = given()
+                .contentType("application/json")
+                .pathParam("id", invalidId)
+                .when()
+                .head("/projects/{id}/categories");
+        assertEquals(404, response.getStatusCode());
+    }
+    @Test
+    void testGetUnidirectionalRelationshipCategoryProject() {
+        //getting relationships of invalid id
+        int invalidId = 600;
+        Response response = given()
+                .contentType("application/json")
+                .pathParam("id", invalidId)
+                .when()
+                .get("/categories/{id}/projects");
+        assertEquals(404, response.getStatusCode());
+        //validating the response even though it should give 404
+        assertEquals(0, response.jsonPath().getList("projects").size()); // no relationships
+    }
+    @Test
+    void testHeadBidirectionalRelationshipCategoryProject() {
+        //getting relationships of invalid id
+        int invalidId = 600;
+        Response response = given()
+                .contentType("application/json")
+                .pathParam("id", invalidId)
+                .when()
+                .head("/categories/{id}/projects");
+        assertEquals(404, response.getStatusCode());
+    }
     @AfterEach
     public void tearDown() {
         if (!todoDeleted) {

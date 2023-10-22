@@ -191,19 +191,9 @@ public class InteroperabilityTest {
     @Test
     void testGetBidirectionalRelationshipTodoProject()
     {
-        //getting relationships of invalid id
-        int invalidId = 600;
-        Response response = given()
-                .contentType("application/json")
-                .pathParam("id", invalidId)
-                .when()
-                .get("/todos/{id}/tasksof");
-        assertEquals(404,response.getStatusCode());
-        //validating the response even though it should give 404
-        assertEquals(0,response.jsonPath().getList("projects").size()); // no relationships
 
         //getting relationships when there are none
-        response = given()
+        Response response = given()
                 .contentType("application/json")
                 .pathParam("id", testTodo.get("id"))
                 .when()
@@ -236,23 +226,13 @@ public class InteroperabilityTest {
     @Test
     void testHeadBidirectionalRelationshipTodoProject()
     {
-        //getting relationships of invalid id
-        int invalidId = 600;
-        Response response = given()
-                .contentType("application/json")
-                .pathParam("id", invalidId)
-                .when()
-                .head("/todos/{id}/tasksof");
-        assertEquals(404,response.getStatusCode());
-
         // getting relationships (doesnt matter if there are any or not since its just for the headers)
-        response = given()
+        Response response = given()
                 .contentType("application/json")
                 .pathParam("id", testTodo.get("id"))
                 .when()
                 .head("/todos/{id}/tasksof");
         assertEquals(200,response.getStatusCode());
-
     }
     @Test
     void testCreateBidirectionalRelationshipProjectTodo()
@@ -316,19 +296,8 @@ public class InteroperabilityTest {
     @Test
     void testGetBidirectionalRelationshipProjectTodo()
     {
-        //getting relationships of invalid id
-        int invalidId = 600;
-        Response response = given()
-                .contentType("application/json")
-                .pathParam("id", invalidId)
-                .when()
-                .get("/projects/{id}/tasks");
-        assertEquals(404,response.getStatusCode());
-        //validating the response even though it should give 404
-        assertEquals(0,response.jsonPath().getList("tasks").size()); // no relationships
-
         //getting relationships when there are none
-        response = given()
+        Response response = given()
                 .contentType("application/json")
                 .pathParam("id", testProject.get("id"))
                 .when()
@@ -361,17 +330,8 @@ public class InteroperabilityTest {
     @Test
     void testHeadBidirectionalRelationshipProjectTodo()
     {
-        //getting relationships of invalid id
-        int invalidId = 600;
-        Response response = given()
-                .contentType("application/json")
-                .pathParam("id", invalidId)
-                .when()
-                .head("/projects/{id}/tasks");
-        assertEquals(404,response.getStatusCode());
-
         // getting relationships (doesnt matter if there are any or not since its just for the headers)
-        response = given()
+        Response response = given()
                 .contentType("application/json")
                 .pathParam("id", testProject.get("id"))
                 .when()
@@ -439,19 +399,8 @@ public class InteroperabilityTest {
     @Test
     void testGetUnidirectionalRelationshipTodoCategory()
     {
-        //getting relationships of invalid id
-        int invalidId = 600;
-        Response response = given()
-                .contentType("application/json")
-                .pathParam("id", invalidId)
-                .when()
-                .get("/todos/{id}/categories");
-        assertEquals(404,response.getStatusCode());
-        //validating the response even though it should give 404
-        assertEquals(0,response.jsonPath().getList("categories").size()); // no relationships
-
         //getting relationships when there are none
-        response = given()
+        Response response = given()
                 .contentType("application/json")
                 .pathParam("id", testTodo.get("id"))
                 .when()
@@ -484,17 +433,8 @@ public class InteroperabilityTest {
     @Test
     void testHeadUnidirectionalRelationshipTodoCategory()
     {
-        //getting relationships of invalid id
-        int invalidId = 600;
-        Response response = given()
-                .contentType("application/json")
-                .pathParam("id", invalidId)
-                .when()
-                .head("/todos/{id}/categories");
-        assertEquals(404,response.getStatusCode());
-
         // getting relationships (doesnt matter if there are any or not since its just for the headers)
-        response = given()
+        Response response = given()
                 .contentType("application/json")
                 .pathParam("id", testTodo.get("id"))
                 .when()
@@ -562,19 +502,8 @@ public class InteroperabilityTest {
     @Test
     void testGetUnidirectionalRelationshipCategoryTodo()
     {
-        //getting relationships of invalid id
-        int invalidId = 600;
-        Response response = given()
-                .contentType("application/json")
-                .pathParam("id", invalidId)
-                .when()
-                .get("/categories/{id}/todos");
-        assertEquals(404,response.getStatusCode());
-        //validating the response even though it should give 404
-        assertEquals(0,response.jsonPath().getList("todos").size()); // no relationships
-
         //getting relationships when there are none
-        response = given()
+        Response response = given()
                 .contentType("application/json")
                 .pathParam("id", testCategory.get("id"))
                 .when()
@@ -607,17 +536,8 @@ public class InteroperabilityTest {
     @Test
     void testHeadBidirectionalRelationshipCategoryTodo()
     {
-        //getting relationships of invalid id
-        int invalidId = 600;
-        Response response = given()
-                .contentType("application/json")
-                .pathParam("id", invalidId)
-                .when()
-                .head("/categories/{id}/todos");
-        assertEquals(404,response.getStatusCode());
-
         // getting relationships (doesnt matter if there are any or not since its just for the headers)
-        response = given()
+        Response response = given()
                 .contentType("application/json")
                 .pathParam("id", testCategory.get("id"))
                 .when()
@@ -685,19 +605,8 @@ public class InteroperabilityTest {
     @Test
     void testGetUnidirectionalRelationshipProjectCategory()
     {
-        //getting relationships of invalid id
-        int invalidId = 600;
-        Response response = given()
-                .contentType("application/json")
-                .pathParam("id", invalidId)
-                .when()
-                .get("/projects/{id}/categories");
-        assertEquals(404,response.getStatusCode());
-        //validating the response even though it should give 404
-        assertEquals(0,response.jsonPath().getList("categories").size()); // no relationships
-
         //getting relationships when there are none
-        response = given()
+        Response response = given()
                 .contentType("application/json")
                 .pathParam("id", testProject.get("id"))
                 .when()
@@ -730,17 +639,8 @@ public class InteroperabilityTest {
     @Test
     void testHeadUnidirectionalRelationshipProjectCategory()
     {
-        //getting relationships of invalid id
-        int invalidId = 600;
-        Response response = given()
-                .contentType("application/json")
-                .pathParam("id", invalidId)
-                .when()
-                .head("/projects/{id}/categories");
-        assertEquals(404,response.getStatusCode());
-
         // getting relationships (doesnt matter if there are any or not since its just for the headers)
-        response = given()
+        Response response = given()
                 .contentType("application/json")
                 .pathParam("id", testProject.get("id"))
                 .when()
@@ -810,19 +710,8 @@ public class InteroperabilityTest {
     @Test
     void testGetUnidirectionalRelationshipCategoryProject()
     {
-        //getting relationships of invalid id
-        int invalidId = 600;
-        Response response = given()
-                .contentType("application/json")
-                .pathParam("id", invalidId)
-                .when()
-                .get("/categories/{id}/projects");
-        assertEquals(404,response.getStatusCode());
-        //validating the response even though it should give 404
-        assertEquals(0,response.jsonPath().getList("projects").size()); // no relationships
-
         //getting relationships when there are none
-        response = given()
+        Response response = given()
                 .contentType("application/json")
                 .pathParam("id", testCategory.get("id"))
                 .when()
@@ -855,17 +744,8 @@ public class InteroperabilityTest {
     @Test
     void testHeadBidirectionalRelationshipCategoryProject()
     {
-        //getting relationships of invalid id
-        int invalidId = 600;
-        Response response = given()
-                .contentType("application/json")
-                .pathParam("id", invalidId)
-                .when()
-                .head("/categories/{id}/projects");
-        assertEquals(404,response.getStatusCode());
-
         // getting relationships (doesnt matter if there are any or not since its just for the headers)
-        response = given()
+        Response response = given()
                 .contentType("application/json")
                 .pathParam("id", testCategory.get("id"))
                 .when()
