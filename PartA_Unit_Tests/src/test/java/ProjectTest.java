@@ -24,8 +24,10 @@ public class ProjectTest {
     private boolean projectDeleted = false; // Tells Tear Down to not delete the project as the Test already done so.
     private String mockTitle = "Test Project";
     private String mockDescription = "Description of the test project";
+    private boolean mockCompleted = false;
     private String mockUpdateTitle = "Updated Test Project";
     private String mockUpdateDescription = "Updated Description of the test project";
+    private boolean mockUpdateCompleted = true;
 
     @BeforeAll
     public static void initialSetup() {
@@ -49,9 +51,10 @@ public class ProjectTest {
     @BeforeEach
     public void setUp() {
         // Create a project before each test
-        Map<String, String> projectData = new HashMap<>();
+        Map<String, Object> projectData = new HashMap<>();
         projectData.put("title", mockTitle);
         projectData.put("description", mockDescription);
+        projectData.put("completed", mockCompleted);
 
         Response response = given()
                 .contentType("application/json")
@@ -67,6 +70,7 @@ public class ProjectTest {
         // Validate that the created project object indeed have the matching fields.
         assertEquals(mockTitle, response.jsonPath().getString("title"));
         assertEquals(mockDescription, response.jsonPath().getString("description"));
+        assertEquals(String.valueOf(mockCompleted), response.jsonPath().getString("completed"));
     }
 
     @AfterEach
@@ -131,9 +135,10 @@ public class ProjectTest {
 
     @Test
     void testUpdateSpecificProjectUsingPOST() {
-        Map<String, String> projectData = new HashMap<>();
+        Map<String, Object> projectData = new HashMap<>();
         projectData.put("title", mockUpdateTitle);
         projectData.put("description", mockUpdateDescription);
+        projectData.put("completed", mockUpdateCompleted);
 
         Response updateResponse = given()
                 .pathParam("id", projectId)
@@ -149,16 +154,19 @@ public class ProjectTest {
                 .get("/projects/{id}");
         String updatedTitle = fetchResponse.jsonPath().getString("projects[0].title");
         String updatedDescription = fetchResponse.jsonPath().getString("projects[0].description");
+        String updatedComplted = fetchResponse.jsonPath().getString("projects[0].completed");
 
         assertEquals(mockUpdateTitle, updatedTitle);
         assertEquals(mockUpdateDescription, updatedDescription);
+        assertEquals(String.valueOf(mockUpdateCompleted), updatedComplted);
     }
 
     @Test
     void testUpdateSpecificProjectUsingPUT() {
-        Map<String, String> projectData = new HashMap<>();
-        projectData.put("title", "Updated Project Again");
-        projectData.put("description", "Updated description again");
+        Map<String, Object> projectData = new HashMap<>();
+        projectData.put("title", mockUpdateTitle);
+        projectData.put("description", mockUpdateDescription);
+        projectData.put("completed", mockUpdateCompleted);
 
         Response updateResponse = given()
                 .pathParam("id", projectId)
@@ -174,9 +182,11 @@ public class ProjectTest {
                 .get("/projects/{id}");
         String updatedTitle = fetchResponse.jsonPath().getString("projects[0].title");
         String updatedDescription = fetchResponse.jsonPath().getString("projects[0].description");
+        String updatedComplted = fetchResponse.jsonPath().getString("projects[0].completed");
 
-        assertEquals("Updated Project Again", updatedTitle);
-        assertEquals("Updated description again", updatedDescription);
+        assertEquals(mockUpdateTitle, updatedTitle);
+        assertEquals(mockUpdateDescription, updatedDescription);
+        assertEquals(String.valueOf(mockUpdateCompleted), updatedComplted);
     }
 
     @Test
@@ -196,4 +206,35 @@ public class ProjectTest {
 
         projectDeleted = true;
     }
+
+    // ---------------- Additional Unit Test Considerations ----------------
+
+    @Test
+    public void testMalformedJSONPayload() {
+        String requestBody = "{Invalid JSON}";
+        Response response = given()
+                .body(requestBody)
+                .post("/projects");
+        assertEquals(400, response.getStatusCode());
+    }
+
+    @Test
+    public void testMalformedXMLPayload() {
+        String requestBody = "<Invalid XML>";
+        Response response = given()
+                .body(requestBody)
+                .post("/projects");
+        assertEquals(400, response.getStatusCode());
+    }
+
+    @Test
+    public void testDeleteNonExistingCategory() {
+        int projectId = 1000;
+        Response response = given()
+                .pathParam("id", projectId)
+                .when()
+                .delete("/projects/{id}");
+        assertEquals(404, response.getStatusCode());
+    }
+
 }
