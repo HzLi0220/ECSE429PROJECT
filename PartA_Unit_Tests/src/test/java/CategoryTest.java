@@ -1,8 +1,10 @@
 import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+
+import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
@@ -15,14 +17,24 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-// For ramdom order tests
+// For random order tests
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.MethodOrderer.Random;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 @TestMethodOrder(Random.class)
 public class CategoryTest {
     private int categoryId;
     private boolean categoryDeleted = false;
+
+    private String mockTitle = "Test Category";
+    private String mockDescription = "Description of the test Category";
+    private String mockUpdateTitle = "Updated Test Category";
+    private String mockUpdateDescription = "Updated Description of the Test Category";
 
     @BeforeAll
     public static void initialSetup() {
@@ -47,9 +59,9 @@ public class CategoryTest {
     public void setUp() {
         // Create a mock category instance before each test
         categoryDeleted = false;
-        Map<String, String> categoryData = new HashMap<>();
-        categoryData.put("title", "Test Category");
-        categoryData.put("description", "Description of the test category");
+        Map<String, Object> categoryData = new HashMap<>();
+        categoryData.put("title", mockTitle);
+        categoryData.put("description", mockDescription);
 
         Response response = given()
                 .contentType("application/json")
@@ -57,8 +69,12 @@ public class CategoryTest {
                 .when()
                 .post("/categories");
         assertEquals(201, response.getStatusCode());
+
         categoryId = response.jsonPath().getInt("id");
         System.out.println("Set Up category with ID " + categoryId);
+
+        assertEquals(mockTitle, response.jsonPath().getString("title"));
+        assertEquals(mockDescription, response.jsonPath().getString("description"));
     }
 
     @AfterEach
@@ -76,8 +92,7 @@ public class CategoryTest {
     }
 
 
-// ------------------------------ /categories/:id -------------------------------
-
+// ------------------------------ /categories -------------------------------
     @Test
     void testGetAllCategories() {
         Response response = given()
@@ -160,32 +175,7 @@ public class CategoryTest {
         assertEquals("Test Category", response.jsonPath().getString("categories[0].title"));
     }
 
-    // --------------------- /categories/:id/todos --------------------
-
-    @Test
-    void testGetCategoryById() {
-        Response response = given()
-                .accept(ContentType.JSON)
-                .when()
-                .get("/categories/" + categoryId);
-        assertEquals(200, response.getStatusCode());
-        assertTrue(response.contentType().contains(ContentType.JSON.toString()));
-        String responseBody = response.getBody().asString();
-
-        // Expected title and description
-        String expectedTitle = "Test Category";
-        String expectedDescription = "Description of the test category";
-
-        JsonPath jsonPath = new JsonPath(responseBody);
-        String actualTitle = jsonPath.getString("categories[0].title");
-        String actualDescription = jsonPath.getString("categories[0].description");
-
-        // Compare the actual and expected values
-        assertEquals(expectedTitle, actualTitle);
-        assertEquals(expectedDescription, actualDescription);
-
-    }
-
+    // --------------------- /categories/:id --------------------
     @Test
     public void testGetCategoryByIdJSON() {
         Response response = given()
@@ -193,6 +183,10 @@ public class CategoryTest {
                 .get("/categories/" + categoryId);
         assertEquals(200, response.getStatusCode());
         assertEquals("application/json", response.getHeader("Content-Type"));
+
+        assertEquals(mockTitle, response.jsonPath().getString("categories[0].title"));
+        assertEquals(mockDescription, response.jsonPath().getString("categories[0].description"));
+
     }
 
     @Test
@@ -202,6 +196,24 @@ public class CategoryTest {
                 .get("/categories/" + categoryId);
         assertEquals(200, response.getStatusCode());
         assertEquals("application/xml", response.getHeader("Content-Type"));
+
+        // Unescape XML entities in the response body and parse it as XML
+        String responseBody = StringEscapeUtils.unescapeXml(response.getBody().asString());
+
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            InputSource is = new InputSource(new StringReader(responseBody));
+            Document doc = builder.parse(is);
+
+            // Extract and assert the title and description elements
+            String title = doc.getElementsByTagName("title").item(0).getTextContent();
+            String description = doc.getElementsByTagName("description").item(0).getTextContent();
+            assertEquals(mockTitle, title);
+            assertEquals(mockDescription, description);
+        } catch (Exception e) {
+            System.out.println("Failed to parse or extract data from the XML response.");
+        }
     }
     @Test
     void testHeadCategoryById() {
@@ -211,34 +223,48 @@ public class CategoryTest {
                 .head("/categories/" + categoryId);
         assertEquals(200, response.getStatusCode());
         assertTrue(response.contentType().contains(ContentType.JSON.toString()));
-
     }
 
     @Test
     void testPostCategoryById() {
-        String requestBody = "{\"title\": \"UpdatedTitle\", \"description\": \"UpdatedDescription\"}";
-        Response response = given()
-                .accept(ContentType.JSON)
-                .contentType(ContentType.JSON)
-                .body(requestBody)
+        Map<String, Object> categoryData = new HashMap<>();
+        categoryData.put("title", mockUpdateTitle);
+        categoryData.put("description", mockUpdateDescription);
+
+        Response updateResponse = given()
+                .body(categoryData)
                 .when()
                 .post("/categories/" + categoryId);
-        assertTrue(response.getStatusCode() == 200 || response.getStatusCode() == 201);
-        assertTrue(response.contentType().contains(ContentType.JSON.toString()));
+        assertTrue(updateResponse.getStatusCode() == 200 || updateResponse.getStatusCode() == 201);
+        assertTrue(updateResponse.contentType().contains(ContentType.JSON.toString()));
 
+        String updatedTitle = updateResponse.jsonPath().getString("title");
+        String updatedDescription = updateResponse.jsonPath().getString("description");
+
+        assertEquals(mockUpdateTitle, updatedTitle);
+        assertEquals(mockUpdateDescription, updatedDescription);
     }
 
     @Test
     void testPutCategoryById() {
-        String requestBody = "{\"title\": \"UpdatedTitle again\", \"description\": \"UpdatedDescription again\"}";
+        Map<String, Object> categoryData = new HashMap<>();
+        categoryData.put("title", mockUpdateTitle);
+        categoryData.put("description", mockUpdateDescription);
+
         Response response = given()
                 .accept(ContentType.JSON)
                 .contentType(ContentType.JSON)
-                .body(requestBody)
+                .body(categoryData)
                 .when()
                 .put("/categories/" + categoryId);
         assertTrue(response.getStatusCode() == 200 || response.getStatusCode() == 204);
         assertTrue(response.contentType().contains(ContentType.JSON.toString()));
+
+        String updatedTitle = response.jsonPath().getString("title");
+        String updatedDescription = response.jsonPath().getString("description");
+
+        assertEquals(mockUpdateTitle, updatedTitle);
+        assertEquals(mockUpdateDescription, updatedDescription);
 
     }
 
@@ -248,14 +274,18 @@ public class CategoryTest {
                 .pathParam("id", categoryId)
                 .when()
                 .delete("/categories/{id}");
-        categoryDeleted = true;
         assertTrue(response.getStatusCode() == 200 || response.getStatusCode() == 204);
-        assertEquals("", response.getBody().asString());
+
+        Response getResponse = given()
+                .pathParam("id", categoryId)
+                .when()
+                .get("/categories/{id}");
+        assertEquals(404, getResponse.getStatusCode());
+        categoryDeleted = true;
 
     }
 
     // --------------------- /categories/:id/todos ----------------------------
-
     @Test
     void testGetCategoryTodos() {
         Response response = given()
@@ -286,13 +316,7 @@ public class CategoryTest {
         assertTrue(response.contentType().contains(ContentType.JSON.toString()));
     }
 
-    // ------ The endpoints below will be tested during the interoperability testing ------
-    // /categories/:id/todos/:id
-    // POST /categories/:id/projects
-    // /categories/:id/projects/:id
-
     // ---------------- Additional Unit Test Considerations ----------------
-
     @Test
     public void testMalformedJSONPayload() {
         String requestBody = "{Invalid JSON}";
