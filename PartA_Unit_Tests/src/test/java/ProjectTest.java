@@ -235,8 +235,8 @@ public class ProjectTest {
     @Test
     void testPostProjectAsXmlWithoutID() {
         String xmlBody = "<project>"
-                + "<title>PostCategoryAsXml</title>"
-                + "<description>testPostCategoryAsXmlWithoutID</description>"
+                + "<title>PostProjectAsXml</title>"
+                + "<description>testPostProjectAsXmlWithoutID</description>"
                 + "</project>";
         Response response = given()
                 .contentType(ContentType.XML)
@@ -246,7 +246,7 @@ public class ProjectTest {
         assertEquals(201, response.getStatusCode());
         assertTrue(response.contentType().contains(ContentType.JSON.toString()));
 
-        //delete the created category to restore system state
+        //delete the created Project to restore system state
         int projectID = response.jsonPath().getInt("id");
         Response deleteResponse = given()
                 .pathParam("id", projectID)
@@ -294,7 +294,7 @@ public class ProjectTest {
     }
 
     @Test
-    public void testDeleteNonExistingCategory() {
+    public void testDeleteNonExistingProject() {
         int projectId = 1000;
         Response response = given()
                 .pathParam("id", projectId)
@@ -306,8 +306,8 @@ public class ProjectTest {
     @Test
     void testPutProjectAsXmlWithoutIDNotAllowed() {
         String xmlBody = "<project>"
-                + "<title>PostCategoryAsXml</title>"
-                + "<description>testPostCategoryAsXmlWithoutID</description>"
+                + "<title>PostProjectAsXml</title>"
+                + "<description>testPostProjectAsXmlWithoutID</description>"
                 + "</project>";
         Response response = given()
                 .contentType(ContentType.XML)

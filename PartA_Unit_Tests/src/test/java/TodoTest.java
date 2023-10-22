@@ -65,7 +65,7 @@ public class TodoTest {
                 .post("/todos");
         assertEquals(201, response.getStatusCode());
 
-        // Extract the project ID for further operations
+        // Extract the TODO ID for further operations
         todoId = response.jsonPath().getInt("id");
         System.out.println("Set Up todo with ID " + todoId);
     }
@@ -216,8 +216,8 @@ public class TodoTest {
                 .get("/todos");
 
         assertEquals(200, response.getStatusCode());
-        List<?> projects = response.jsonPath().getList("todos");
-        assertTrue(projects.isEmpty());
+        List<?> todos = response.jsonPath().getList("todos");
+        assertTrue(todos.isEmpty());
     }
 
     @Test
