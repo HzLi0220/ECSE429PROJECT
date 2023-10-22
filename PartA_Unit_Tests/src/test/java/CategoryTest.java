@@ -14,7 +14,11 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+// For ramdom order tests
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.Random;
 
+@TestMethodOrder(Random.class)
 public class CategoryTest {
     private int categoryId;
     private boolean categoryDeleted = false;

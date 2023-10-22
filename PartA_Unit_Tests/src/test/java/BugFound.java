@@ -15,8 +15,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
+// For ramdom order tests
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.Random;
 
 // Note all the tests in this class will be failing due to bugs/risks found in the application under the task.
+@TestMethodOrder(Random.class)
 public class BugFound {
 
     private int projectId;

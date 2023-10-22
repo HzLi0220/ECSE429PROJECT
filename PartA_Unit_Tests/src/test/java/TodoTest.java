@@ -12,7 +12,11 @@ import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.*;
+// For ramdom order tests
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.Random;
 
+@TestMethodOrder(Random.class)
 public class TodoTest {
 
     private int todoId;
