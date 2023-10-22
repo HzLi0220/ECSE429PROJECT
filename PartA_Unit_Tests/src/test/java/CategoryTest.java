@@ -171,7 +171,7 @@ public class CategoryTest {
         assertEquals(200, response.getStatusCode());
         assertTrue(response.contentType().contains(ContentType.JSON.toString()));
 
-        // Validate that the filtered project object indeed have the matching fields.
+        // Validate that the filtered category object indeed have the matching fields.
         assertEquals("Test Category", response.jsonPath().getString("categories[0].title"));
     }
 
@@ -350,8 +350,8 @@ public class CategoryTest {
                 .get("/categories");
 
         assertEquals(200, response.getStatusCode());
-        List<?> projects = response.jsonPath().getList("categories");
-        assertTrue(projects.isEmpty());
+        List<?> categories = response.jsonPath().getList("categories");
+        assertTrue(categories.isEmpty());
     }
 
     @Test
