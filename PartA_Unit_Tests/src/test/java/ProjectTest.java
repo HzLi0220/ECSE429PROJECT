@@ -22,6 +22,10 @@ public class ProjectTest {
 
     private int projectId;
     private boolean projectDeleted = false; // Tells Tear Down to not delete the project as the Test already done so.
+    private String mockTitle = "Test Project";
+    private String mockDescription = "Description of the test project";
+    private String mockUpdateTitle = "Updated Test Project";
+    private String mockUpdateDescription = "Updated Description of the test project";
 
     @BeforeAll
     public static void initialSetup() {
@@ -46,8 +50,8 @@ public class ProjectTest {
     public void setUp() {
         // Create a project before each test
         Map<String, String> projectData = new HashMap<>();
-        projectData.put("title", "Test Project");
-        projectData.put("description", "Description of the test project");
+        projectData.put("title", mockTitle);
+        projectData.put("description", mockDescription);
 
         Response response = given()
                 .contentType("application/json")
@@ -59,6 +63,10 @@ public class ProjectTest {
         // Extract the project ID for further operations
         projectId = response.jsonPath().getInt("id");
         System.out.println("Set Up project with ID projectId");
+
+        // Validate that the created project object indeed have the matching fields.
+        assertEquals(mockTitle, response.jsonPath().getString("title"));
+        assertEquals(mockDescription, response.jsonPath().getString("description"));
     }
 
     @AfterEach
@@ -106,6 +114,10 @@ public class ProjectTest {
                 .when()
                 .get("/projects/{id}");
         assertEquals(200, response.getStatusCode());
+
+        // Validate that the created project object indeed have the matching fields.
+        assertEquals(mockTitle, response.jsonPath().getString("projects[0].title"));
+        assertEquals(mockDescription, response.jsonPath().getString("projects[0].description"));
     }
 
     @Test
@@ -120,8 +132,8 @@ public class ProjectTest {
     @Test
     void testUpdateSpecificProjectUsingPOST() {
         Map<String, String> projectData = new HashMap<>();
-        projectData.put("title", "Updated Project");
-        projectData.put("description", "Updated description");
+        projectData.put("title", mockUpdateTitle);
+        projectData.put("description", mockUpdateDescription);
 
         Response updateResponse = given()
                 .pathParam("id", projectId)
@@ -138,8 +150,8 @@ public class ProjectTest {
         String updatedTitle = fetchResponse.jsonPath().getString("projects[0].title");
         String updatedDescription = fetchResponse.jsonPath().getString("projects[0].description");
 
-        assertEquals("Updated Project", updatedTitle);
-        assertEquals("Updated description", updatedDescription);
+        assertEquals(mockUpdateTitle, updatedTitle);
+        assertEquals(mockUpdateDescription, updatedDescription);
     }
 
     @Test
@@ -174,6 +186,14 @@ public class ProjectTest {
                 .when()
                 .delete("/projects/{id}");
         assertEquals(200, response.getStatusCode());
+
+        // Make sure it is indeed deleted as that 404 is returned by the get by ID.
+        Response getResponse = given()
+                .pathParam("id", projectId)
+                .when()
+                .get("/projects/{id}");
+        assertEquals(404, getResponse.getStatusCode());
+
         projectDeleted = true;
     }
 }
