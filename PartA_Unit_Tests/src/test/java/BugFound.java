@@ -77,6 +77,7 @@ public class BugFound {
         System.out.println("Set Up todo with ID " + todoId);
     }
 
+    // Relates to P.1 in the session note sheet
     @Test
     void testUpdateProjectWithStringValues() {
         createProject();
@@ -98,6 +99,7 @@ public class BugFound {
         assertEquals(200, updateResponse.getStatusCode());
     }
 
+    // Relates to T.2 in the session notes bugs/issues sub-sheet.
     @Test
     void testServerHeartbeat() {
         createProject();
@@ -107,6 +109,7 @@ public class BugFound {
         assertEquals(200, response.getStatusCode());
     }
 
+    // Relates to I.3 in the session note sheet
     @Test
     void testUpdateTodoUsingIdWithPut() {
         Map<String, String> todoDataUpdated = new HashMap<>();
@@ -120,6 +123,8 @@ public class BugFound {
                 .put("/todos/{id}");
         assertEquals(200, response.getStatusCode());
     }
+
+    // Relates to I.1 in the session note sheet
     @Test
     void testGetBidirectionalRelationshipTodoProjectWithInvalidId() {
         //getting relationships of invalid id
@@ -133,6 +138,8 @@ public class BugFound {
         //validating the response even though it should give 404
         assertEquals(0, response.jsonPath().getList("projects").size()); // no relationships
     }
+
+    // Relates to I.1 in the session note sheet
     @Test
     void testHeadBidirectionalRelationshipTodoProjectWithInvalidId() {
         //getting relationships of invalid id
@@ -144,6 +151,8 @@ public class BugFound {
                 .head("/todos/{id}/tasksof");
         assertEquals(404, response.getStatusCode());
     }
+
+    // Relates to I.1 in the session note sheet
     @Test
     void testGetBidirectionalRelationshipProjectTodoWithInvalidId() {
         //getting relationships of invalid id
@@ -157,6 +166,8 @@ public class BugFound {
         //validating the response even though it should give 404
         assertEquals(0, response.jsonPath().getList("tasks").size()); // no relationships
     }
+
+    // Relates to I.1 in the session note sheet
     @Test
     void testHeadBidirectionalRelationshipProjectTodoWithInvalidId() {
         //getting relationships of invalid id
@@ -168,6 +179,8 @@ public class BugFound {
                 .head("/projects/{id}/tasks");
         assertEquals(404, response.getStatusCode());
     }
+
+    // Relates to I.1 in the session note sheet
     @Test
     void testGetUnidirectionalRelationshipTodoCategoryWithInvalidId() {
         //getting relationships of invalid id
@@ -181,6 +194,8 @@ public class BugFound {
         //validating the response even though it should give 404
         assertEquals(0, response.jsonPath().getList("categories").size()); // no relationships
     }
+
+    // Relates to I.1 in the session note sheet
     @Test
     void testHeadUnidirectionalRelationshipTodoCategoryWithInvalidId() {
         //getting relationships of invalid id
@@ -192,6 +207,8 @@ public class BugFound {
                 .head("/todos/{id}/categories");
         assertEquals(404, response.getStatusCode());
     }
+
+    // Relates to I.1 in the session note sheet
     @Test
     void testGetUnidirectionalRelationshipCategoryTodoWithInvalidId() {
         //getting relationships of invalid id
@@ -205,6 +222,8 @@ public class BugFound {
         //validating the response even though it should give 404
         assertEquals(0, response.jsonPath().getList("todos").size()); // no relationships
     }
+
+    // Relates to I.1 in the session note sheet
     @Test
     void testHeadBidirectionalRelationshipCategoryTodoWithInvalidId() {
         //getting relationships of invalid id
@@ -216,6 +235,8 @@ public class BugFound {
                 .head("/categories/{id}/todos");
         assertEquals(404, response.getStatusCode());
     }
+
+    // Relates to I.1 in the session note sheet
     @Test
     void testGetUnidirectionalRelationshipProjectCategoryWithInvalidId() {
         //getting relationships of invalid id
@@ -229,6 +250,8 @@ public class BugFound {
         //validating the response even though it should give 404
         assertEquals(0, response.jsonPath().getList("categories").size()); // no relationships
     }
+
+    // Relates to I.1 in the session note sheet
     @Test
     void testHeadUnidirectionalRelationshipProjectCategoryWithInvalidId() {
         //getting relationships of invalid id
@@ -240,8 +263,10 @@ public class BugFound {
                 .head("/projects/{id}/categories");
         assertEquals(404, response.getStatusCode());
     }
+
+    // Relates to I.1 in the session note sheet
     @Test
-    void testGetUnidirectionalRelationshipCategoryProject() {
+    void testGetUnidirectionalRelationshipCategoryProjectWithInvalidId() {
         //getting relationships of invalid id
         int invalidId = 600;
         Response response = given()
@@ -253,8 +278,10 @@ public class BugFound {
         //validating the response even though it should give 404
         assertEquals(0, response.jsonPath().getList("projects").size()); // no relationships
     }
+
+    // Relates to I.1 in the session note sheet
     @Test
-    void testHeadBidirectionalRelationshipCategoryProject() {
+    void testHeadBidirectionalRelationshipCategoryProjectWithInvalidId() {
         //getting relationships of invalid id
         int invalidId = 600;
         Response response = given()

@@ -116,6 +116,8 @@ public class ProjectTest {
         }
     }
 
+// ------------------------------ /projects -------------------------------
+
     /**
      * Tests fetching all projects.
      */
@@ -152,6 +154,34 @@ public class ProjectTest {
                 .head("/projects");
         assertEquals(200, response.getStatusCode());
     }
+
+    /**
+     * Tests posting a project with XML content without specifying an ID.
+     */
+    @Test
+    void testPostProjectAsXmlWithoutID() {
+        String xmlBody = "<project>"
+                + "<title>PostProjectAsXml</title>"
+                + "<description>testPostProjectAsXmlWithoutID</description>"
+                + "</project>";
+        Response response = given()
+                .contentType(ContentType.XML)
+                .body(xmlBody)
+                .when()
+                .post("/projects");
+        assertEquals(201, response.getStatusCode());
+        assertTrue(response.contentType().contains(ContentType.JSON.toString()));
+
+        //delete the created Project to restore system state
+        int projectID = response.jsonPath().getInt("id");
+        Response deleteResponse = given()
+                .pathParam("id", projectID)
+                .when()
+                .delete("/projects/{id}");
+        assertEquals(200, deleteResponse.getStatusCode());
+    }
+
+// ------------------------------ /projects/id -------------------------------
 
     /**
      * Tests fetching a specific project by its ID.
@@ -271,32 +301,6 @@ public class ProjectTest {
         assertEquals(mockUpdateTitle, updatedTitle);
         assertEquals(mockUpdateDescription, updatedDescription);
         assertEquals(String.valueOf(mockUpdateCompleted), updatedComplted);
-    }
-
-    /**
-     * Tests posting a project with XML content without specifying an ID.
-     */
-    @Test
-    void testPostProjectAsXmlWithoutID() {
-        String xmlBody = "<project>"
-                + "<title>PostProjectAsXml</title>"
-                + "<description>testPostProjectAsXmlWithoutID</description>"
-                + "</project>";
-        Response response = given()
-                .contentType(ContentType.XML)
-                .body(xmlBody)
-                .when()
-                .post("/projects");
-        assertEquals(201, response.getStatusCode());
-        assertTrue(response.contentType().contains(ContentType.JSON.toString()));
-
-        //delete the created Project to restore system state
-        int projectID = response.jsonPath().getInt("id");
-        Response deleteResponse = given()
-                .pathParam("id", projectID)
-                .when()
-                .delete("/projects/{id}");
-        assertEquals(200, deleteResponse.getStatusCode());
     }
 
     /**
