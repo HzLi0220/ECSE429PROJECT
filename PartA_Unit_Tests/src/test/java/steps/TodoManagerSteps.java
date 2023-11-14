@@ -87,4 +87,27 @@ public class TodoManagerSteps {
     public void responseContainsProject(String name, String description) {
         response.then().body("title", equalTo(name)).body("description", equalTo(description));
     }
+
+    // get all categories
+    @When("I send a GET request to {string} with Accept header {string}")
+    public void sendGetRequestWithAcceptHeader(String endpoint, String acceptHeader) {
+        response = given().header("Accept", acceptHeader).when().get(endpoint);
+    }
+
+    @When("I send a GET request to an invalid endpoint {string}")
+    public void sendInvalidGetRequest(String endpoint) {
+        response = given().when().get(endpoint);
+    }
+
+    @Then("the response should contain a list of categories in JSON format")
+    public void checkResponseContainsCategoriesInJSON() {
+        response.then().body("size()", greaterThan(0)).and().contentType(equalTo("application/json"));
+    }
+
+    @Then("the response should contain a list of categories in XML format")
+    public void checkResponseContainsCategoriesInXML() {
+        response.then().body("category", notNullValue()).and().contentType(equalTo("application/xml"));
+    }
+
+
 }
