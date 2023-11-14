@@ -10,6 +10,8 @@ import io.cucumber.java.en.Then;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Map;
+
 import io.cucumber.java.After;
 
 public class TodoManagerSteps {
@@ -109,5 +111,26 @@ public class TodoManagerSteps {
         response.then().body("category", notNullValue()).and().contentType(equalTo("application/xml"));
     }
 
+    //create new category
+    @When("I send a POST request to {string} with the following details:")
+    public void postCategory(String endpoint, Map<String, String> categoryDetails) {
+        this.endpoint = endpoint;
+        String categoryJson = String.format("{\"title\": \"%s\", \"description\": \"%s\"}",
+                categoryDetails.get("title"),
+                categoryDetails.get("description"));
+        response = given().contentType("application/json").body(categoryJson).when().post(this.endpoint);
+    }
+
+    @When("I send a POST request to {string} without a title")
+    public void postCategoryWithoutTitle(String endpoint) {
+        String categoryJson = "{ \"description\": \"Category without a title\" }";
+        response = given().contentType("application/json").body(categoryJson).when().post(endpoint);
+    }
+
+
+    @Then("the response should contain the created category details")
+    public void checkResponseContainsCategoryDetails() {
+        response.then().body("title", notNullValue()).body("description", notNullValue());
+    }
 
 }

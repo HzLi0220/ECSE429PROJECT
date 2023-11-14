@@ -1,4 +1,5 @@
 Feature: Get all categories
+  As a user, I want to retrieve a list of all available categories so that I can explore the entire category catalog.
 
   Background:
     Given the Todo Manager API is running
