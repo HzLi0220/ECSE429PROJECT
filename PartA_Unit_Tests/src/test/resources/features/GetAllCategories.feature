@@ -9,7 +9,7 @@ Feature: Get all categories
     Then I should receive a response with status code 200
     And the response should contain a list of categories in JSON format
 
-  Scenario: normal flow - get all categories in xml format
+  Scenario: alternate flow - get all categories in xml format
     When I send a GET request to "/categories" with Accept header "application/xml"
     Then I should receive a response with status code 200
     And the response should contain a list of categories in XML format
