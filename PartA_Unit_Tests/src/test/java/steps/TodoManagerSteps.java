@@ -1,5 +1,6 @@
 package steps;
 
+import io.cucumber.java.en.And;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import static io.restassured.RestAssured.given;
@@ -274,6 +275,56 @@ public class TodoManagerSteps {
         response.then().body("title", notNullValue()).body("description", notNullValue());
     }
 
+    @And("the response should contain a todo task with name {string} and description {string}")
+    public void theResponseShouldContainATodoTaskWithNameAndDescription(String name, String description) {
+        response.then().body("title", equalTo(name)).body("description", equalTo(description));
+    }
+
+    @When("I send a GET request to {string}")
+    public void iSendAGETRequestTo(String endpoint) {
+        response = given().when().get(endpoint);
+    }
+
+    @And("the response should contain a list of todos")
+    public void theResponseShouldContainAListOfTodos() {
+        response.then().body("size()", greaterThan(0));
+    }
+
+    @When("I send a GET request to {string} with filter {string}")
+    public void iSendAGETRequestToWithFilter(String endpoint, String filter) {
+        response = given().when().get(endpoint + filter);
+    }
+
+    @When("I send a GET request to {string} with an invalid ID")
+    public void iSendAGETRequestToWithAnInvalidID(String endpoint) {
+        response = given().when().get(endpoint + "/" + Integer.MAX_VALUE);
+    }
+
+    @When("I send a PUT request to {string} with name {string} and description {string}")
+    public void iSendAPUTRequestToWithNameAndDescription(String endpoint, String name, String description) {
+        this.endpoint = endpoint;
+        String projectJson = "{\"title\": \"" + name + "\", \"description\": \"" + description + "\"}";
+        response = given().contentType("application/json").body(projectJson).when().put(this.endpoint);
+    }
+
+
+    @When("I send a PUT request to {string} with name {string} and description {string} and invalid ID")
+    public void iSendAPUTRequestToWithNameAndDescriptionAndInvalidID(String endpoint, String name, String description) {
+        this.endpoint = endpoint;
+        String projectJson = "{\"title\": \"" + name + "\", \"description\": \"" + description + "\"}";
+        response = given().contentType("application/json").body(projectJson).when().put(this.endpoint + "/" + Integer.MAX_VALUE);
+    }
+
+    @When("I send a DELETE request to {string}")
+    public void iSendADELETERequestTo(String endpoint) {
+        response = given().when().delete(endpoint);
+    }
+
+    @When("I send a DELETE request to {string} with invalid ID")
+    public void iSendADELETERequestToWithInvalidID(String endpoint) {
+        response = given().when().delete(endpoint + "/" + Integer.MAX_VALUE);
+    }
+  
     @Then("the project with name {string} should no longer exist")
     public void the_project_with_name_should_no_longer_exist(String s) {
         // Write code here that turns the phrase above into concrete actions
@@ -331,5 +382,4 @@ public class TodoManagerSteps {
         Response getResponse = RestAssured.get("/categories/" + deletedCategoryId);
         getResponse.then().statusCode(404);
     }
-
 }
