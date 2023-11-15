@@ -166,6 +166,7 @@ public class TodoManagerSteps {
         String responseBody = response.asString();
         assertTrue(responseBody.contains(expectedName));
     }
+
     // get all categories
     @When("I send a GET request to {string} with Accept header {string}")
     public void sendGetRequestWithAcceptHeader(String endpoint, String acceptHeader) {
@@ -175,6 +176,16 @@ public class TodoManagerSteps {
     @When("I send a GET request to an invalid endpoint {string}")
     public void sendInvalidGetRequest(String endpoint) {
         response = given().when().get(endpoint);
+    }
+
+    @Then("the response should contain a list of categories in JSON format")
+    public void checkResponseContainsCategoriesInJSON() {
+        response.then().body("size()", greaterThan(0)).and().contentType(equalTo("application/json"));
+    }
+
+    @Then("the response should contain a list of categories in XML format")
+    public void checkResponseContainsCategoriesInXML() {
+        response.then().body("category", notNullValue()).and().contentType(equalTo("application/xml"));
     }
 
     @When("I send a DELETE request with ID {string}")
@@ -204,16 +215,6 @@ public class TodoManagerSteps {
     @Then("the response should contain an empty list of projects")
     public void responseContainsEmptyListOfProjects() {
         response.then().body("projects", hasSize(0));
-    }
-
-    @Then("the response should contain a list of categories in JSON format")
-    public void checkResponseContainsCategoriesInJSON() {
-        response.then().body("size()", greaterThan(0)).and().contentType(equalTo("application/json"));
-    }
-
-    @Then("the response should contain a list of categories in XML format")
-    public void checkResponseContainsCategoriesInXML() {
-        response.then().body("category", notNullValue()).and().contentType(equalTo("application/xml"));
     }
 
     //create new category
