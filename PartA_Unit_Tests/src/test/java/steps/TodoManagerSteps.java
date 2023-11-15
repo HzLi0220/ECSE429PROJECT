@@ -116,11 +116,6 @@ public class TodoManagerSteps {
         response = given().contentType("application/json").body(projectJson).when().post(this.endpoint);
     }
 
-    @When("I send a GET request to {string}")
-    public void sendGetRequest(String endpoint) {
-        response = given().when().get(endpoint);
-    }
-
     @When("I send a GET request to {string} with filter {string}")
     public void sendGetRequestWithFilter(String endpoint, String filter) {
         response = given().queryParam("title", filter).when().get(endpoint);
@@ -288,11 +283,6 @@ public class TodoManagerSteps {
     @And("the response should contain a list of todos")
     public void theResponseShouldContainAListOfTodos() {
         response.then().body("size()", greaterThan(0));
-    }
-
-    @When("I send a GET request to {string} with filter {string}")
-    public void iSendAGETRequestToWithFilter(String endpoint, String filter) {
-        response = given().when().get(endpoint + filter);
     }
 
     @When("I send a GET request to {string} with an invalid ID")
