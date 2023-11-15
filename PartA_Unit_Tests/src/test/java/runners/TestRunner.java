@@ -9,8 +9,9 @@ import java.io.IOException;
 
 @RunWith(Cucumber.class)
 @CucumberOptions(
-    features = "src/test/resources/features",
-    glue = "steps"
+        features = "src/test/resources/features",
+        glue = ".steps",
+        plugin = {"rerun:target/rerun.txt", "pretty", "html:target/cucumber-reports"}
 )
 public class TestRunner {
 
