@@ -13,6 +13,7 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.When;
 import io.cucumber.java.en.Then;
+import io.cucumber.java.en.And;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -240,6 +241,59 @@ public class TodoManagerSteps {
     @Then("the project with name {string} should no longer exist")
     public void the_project_with_name_should_no_longer_exist(String s) {
         // Write code here that turns the phrase above into concrete actions
+    }
+
+    //get specific category
+    @When("I send a GET request to {string} with ID {string} and with Accept header {string}")
+    public void getCategoryById(String endpoint, String categoryId, String acceptHeader) {
+        this.endpoint = endpoint.replace("{id}", categoryId);
+        response = given().header("Accept", acceptHeader).when().get(this.endpoint);
+    }
+
+    @Then("the response should contain the category details in JSON format")
+    public void checkResponseContainsCategoryDetailsJson() {
+        response.then().body("size()", greaterThan(0)).and().contentType(equalTo("application/json"));
+
+    }
+
+    @Then("the response should contain the category details in XML format")
+    public void checkResponseContainsCategoryDetailsXml() {
+        response.then().contentType("application/xml").and().body("category.title", notNullValue())
+                .body("category.description", notNullValue());
+    }
+
+    @When("I send a GET request to {string} with ID {string}")
+    public void getCategoryByNonExistentId(String endpoint, String categoryId) {
+        this.endpoint = endpoint.replace("{id}", categoryId);
+        response = given().when().get(this.endpoint);
+    }
+
+    //update category
+    @When("I send a PUT request with ID {string} and request body containing new title {string} and new description {string}")
+    public void sendPutRequestWithNewTitleAndDescription(String categoryId, String newTitle, String newDescription) {
+        String requestBody = "{\"title\":\"" + newTitle + "\",\"description\":\"" + newDescription + "\"}";
+        response = RestAssured.given().header("Content-Type", "application/json").body(requestBody)
+                .put("/categories/" + categoryId);
+    }
+
+    @When("I send a PUT request with ID {string} and request body containing modified title {string} and new description {string}")
+    public void sendPutRequestWithModifiedTitleAndDescription(String categoryId, String modifiedTitle, String newDescription) {
+        String requestBody = "{\"title\":\"" + modifiedTitle + "\",\"description\":\"" + newDescription + "\"}";
+        response = RestAssured.given().header("Content-Type", "application/json").body(requestBody)
+                .put("/categories/" + categoryId);
+    }
+
+    //delete category
+    @When("I make a DELETE request with ID {string}")
+    public void deleteCategoryById(String categoryId) {
+        response = RestAssured.delete("/categories/" + categoryId);
+    }
+
+    @Then("I verify that the category with ID {string} no longer exists in the system by sending a GET request and receiving a response with status code 404")
+    public void verifyCategoryDoesNotExist(String deletedCategoryId) {
+        // Ensure that the category with the deleted ID no longer exists
+        Response getResponse = RestAssured.get("/categories/" + deletedCategoryId);
+        getResponse.then().statusCode(404);
     }
 
 }
