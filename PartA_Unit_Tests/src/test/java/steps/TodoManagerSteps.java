@@ -332,39 +332,4 @@ public class TodoManagerSteps {
         getResponse.then().statusCode(404);
     }
 
-    private void sendRequestInterop(String method, String endpoint, String Id1, String Id2)
-    {
-        this.endpoint = endpoint;
-        if (method.equals("POST"))
-        {
-            String projectJson = "{id : \""+Id2+"\"}";
-            response = given().contentType("application/json").body(projectJson).pathParam("id", Id1).when().post(this.endpoint);
-
-        } else if (method.equals("DELETE"))
-        {
-            response = given().contentType("application/json").pathParam("id", Id2).pathParam("id2", Id1).when().delete(this.endpoint);
-        }
-    }
-    
-    @Given("the user sent a {string} request {string} to category {string} to project {string}")
-    public void givenSendPostRequestAddCategoryProject(String method, String endpoint, String categoryId, String projectId)
-    {
-        sendRequestInterop(method, endpoint, categoryId, projectId);
-    }
-    @When("the user sends a {string} request {string} to category {string} to project {string}")
-    public void whenSendPostRequestAddCategoryProject(String method, String endpoint, String categoryId, String projectId)
-    {
-        sendRequestInterop( method,  endpoint,  categoryId,  projectId);
-    }
-
-    @When("the user sends a {string} request {string} to todo {string} to category {string}")
-    public void whenSendPostRequestAddTodoCategory(String method, String endpoint, String categoryId, String projectId)
-    {
-        sendRequestInterop( method,  endpoint,  categoryId,  projectId);
-    }
-    @When("the user sends a {string} request {string} to todo {string} to project {string}")
-    public void whenSendPostRequestAddTodoProject(String method, String endpoint, String categoryId, String projectId)
-    {
-        sendRequestInterop( method,  endpoint,  categoryId,  projectId);
-    }
 }
