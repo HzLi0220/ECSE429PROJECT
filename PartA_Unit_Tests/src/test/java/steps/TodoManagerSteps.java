@@ -15,6 +15,8 @@ import io.cucumber.java.en.Then;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Map;
+
 import io.cucumber.java.After;
 
 public class TodoManagerSteps {
@@ -32,7 +34,7 @@ public class TodoManagerSteps {
                 given().when().get("/shutdown");
             } catch (Exception e) { } 
             try {
-                Thread.sleep(200);
+                Thread.sleep(300);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -56,7 +58,7 @@ public class TodoManagerSteps {
     private void startApi() {
         try {
             apiProcess = new ProcessBuilder("java", "-jar", "runTodoManagerRestAPI-1.5.5.jar").start();
-            Thread.sleep(200);
+            Thread.sleep(300);
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -140,4 +142,47 @@ public class TodoManagerSteps {
         String responseBody = response.asString();
         assertTrue(responseBody.contains(expectedName));
     }
+    // get all categories
+    @When("I send a GET request to {string} with Accept header {string}")
+    public void sendGetRequestWithAcceptHeader(String endpoint, String acceptHeader) {
+        response = given().header("Accept", acceptHeader).when().get(endpoint);
+    }
+
+    @When("I send a GET request to an invalid endpoint {string}")
+    public void sendInvalidGetRequest(String endpoint) {
+        response = given().when().get(endpoint);
+    }
+
+    @Then("the response should contain a list of categories in JSON format")
+    public void checkResponseContainsCategoriesInJSON() {
+        response.then().body("size()", greaterThan(0)).and().contentType(equalTo("application/json"));
+    }
+
+    @Then("the response should contain a list of categories in XML format")
+    public void checkResponseContainsCategoriesInXML() {
+        response.then().body("category", notNullValue()).and().contentType(equalTo("application/xml"));
+    }
+
+    //create new category
+    @When("I send a POST request to {string} with the following details:")
+    public void postCategory(String endpoint, Map<String, String> categoryDetails) {
+        this.endpoint = endpoint;
+        String categoryJson = String.format("{\"title\": \"%s\", \"description\": \"%s\"}",
+                categoryDetails.get("title"),
+                categoryDetails.get("description"));
+        response = given().contentType("application/json").body(categoryJson).when().post(this.endpoint);
+    }
+
+    @When("I send a POST request to {string} without a title")
+    public void postCategoryWithoutTitle(String endpoint) {
+        String categoryJson = "{ \"description\": \"Category without a title\" }";
+        response = given().contentType("application/json").body(categoryJson).when().post(endpoint);
+    }
+
+
+    @Then("the response should contain the created category details")
+    public void checkResponseContainsCategoryDetails() {
+        response.then().body("title", notNullValue()).body("description", notNullValue());
+    }
+
 }
