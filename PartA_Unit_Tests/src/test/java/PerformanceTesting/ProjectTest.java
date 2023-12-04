@@ -76,11 +76,13 @@ public class ProjectTest {
         return metrics;
     }
 
-    private void recordMetrics(FileWriter writer, int iteration, long timeToCreate, long timeToUpdate) {
-        Map<String, Object> metrics = getSystemMetrics();
+    private void recordMetrics(FileWriter writer, int iteration, long timeToCreate, long timeToUpdate, long timeToDelete,
+                               double createMemoryUsage, double updateMemoryUsage, double deleteMemoryUsage,
+                               double createCpuUsage, double updateCpuUsage, double deleteCpuUsage) {
         try {
-            writer.write(iteration + ", " + timeToCreate + ", " + timeToUpdate + ", " +
-                    metrics.get("used_memory") + ", " + metrics.get("cpu_load") + "\n");
+            writer.write(iteration + ", " + timeToCreate + ", " + timeToUpdate + ", " + timeToDelete + ", " +
+                    createMemoryUsage + ", " + updateMemoryUsage + ", " + deleteMemoryUsage + ", " +
+                    createCpuUsage + ", " + updateCpuUsage + ", " + deleteCpuUsage + "\n");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -89,7 +91,7 @@ public class ProjectTest {
     public void performanceTest(int n) {
         List<Integer> projectIds = new ArrayList<>();
         try (FileWriter writer = new FileWriter("projectCreateUpdate.csv")) {
-            writer.write("#n, time_to_create, time_to_update, used_memory, cpu_load\n");
+            writer.write("#n, time_to_create, time_to_update, time_to_delete, create_memory_usage, update_memory_usage, delete_memory_usage, create_cpu_usage, update_cpu_usage, delete_cpu_usage\n");
 
             // Create and Update Projects
             for (int i = 1; i <= n; i++) {
@@ -100,14 +102,28 @@ public class ProjectTest {
                 int projectId = createResponse.jsonPath().getInt("id");
                 projectIds.add(projectId);
                 delay();
+
+                // Record metrics after creating
+                Map<String, Object> createMetrics = getSystemMetrics();
+                double createMemoryUsage = (double) createMetrics.get("used_memory");
+                double createCpuUsage = (double) createMetrics.get("cpu_load");
+
                 // Update Project
                 startTime = System.nanoTime();
                 updateProject(projectId, "Updated Title for " + i + "th object", "Updated Description for " + i + "th object", true);
                 long timeToUpdate = System.nanoTime() - startTime;
 
+                // Record metrics after updating
+                Map<String, Object> updateMetrics = getSystemMetrics();
+                double updateMemoryUsage = (double) updateMetrics.get("used_memory");
+                double updateCpuUsage = (double) updateMetrics.get("cpu_load");
+
                 // Store create and update times
 //                writer.write(i + ", " + timeToCreate + ", " + timeToUpdate + "\n");
-                recordMetrics(writer, i, timeToCreate, timeToUpdate);
+//                recordMetrics(writer, i, timeToCreate, timeToUpdate);
+                recordMetrics(writer, i, timeToCreate, timeToUpdate, 0,
+                        createMemoryUsage, updateMemoryUsage, 0,
+                        createCpuUsage, updateCpuUsage, 0);
                 delay();
             }
         } catch (IOException e) {
@@ -115,7 +131,7 @@ public class ProjectTest {
         }
 
         try (FileWriter writer = new FileWriter("projectDelete.csv")) {
-            writer.write("#n, time_to_delete, time_to_update(n/a), used_memory, cpu_load\n");
+            writer.write("#n, time_to_create, time_to_update, time_to_delete, create_memory_usage, update_memory_usage, delete_memory_usage, create_cpu_usage, update_cpu_usage, delete_cpu_usage\n");
 
             // Delete Projects and write metrics to CSV
             for (int i = 0; i < projectIds.size(); i++) {
@@ -123,9 +139,18 @@ public class ProjectTest {
                 deleteProject(projectIds.get(i));
                 long timeToDelete = System.nanoTime() - startTime;
 
+                // Record metrics after deleting
+                Map<String, Object> deleteMetrics = getSystemMetrics();
+                double deleteMemoryUsage = (double) deleteMetrics.get("used_memory");
+                double deleteCpuUsage = (double) deleteMetrics.get("cpu_load");
+
                 // Write all times to CSV
 //                writer.write("" + (projectIds.size()-i) + ", "+ timeToDelete + "\n");
-                recordMetrics(writer, projectIds.size()-i, timeToDelete, 0);
+//                recordMetrics(writer, projectIds.size()-i, timeToDelete, 0);
+                recordMetrics(writer, projectIds.size() - i, 0, 0, timeToDelete,
+                        0, 0, deleteMemoryUsage,
+                        0, 0, deleteCpuUsage);
+
                 delay();
             }
         } catch (IOException e) {
