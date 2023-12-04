@@ -1,7 +1,10 @@
 package PerformanceTesting;
 
+import com.sun.management.OperatingSystemMXBean;
 import io.restassured.response.Response;
 import static io.restassured.RestAssured.given;
+
+import java.lang.management.ManagementFactory;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
@@ -59,10 +62,34 @@ public class ProjectTest {
         }
     }
 
+    private Map<String, Object> getSystemMetrics() {
+        Map<String, Object> metrics = new HashMap<>();
+
+        // Get memory usage
+        Runtime runtime = Runtime.getRuntime();
+        metrics.put("used_memory", (runtime.totalMemory() - runtime.freeMemory()) / (1024.0 * 1024.0));
+
+        // Get CPU usage
+        OperatingSystemMXBean osMXBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+        metrics.put("cpu_load", (osMXBean.getProcessCpuLoad() * 100));
+
+        return metrics;
+    }
+
+    private void recordMetrics(FileWriter writer, int iteration, long timeToCreate, long timeToUpdate) {
+        Map<String, Object> metrics = getSystemMetrics();
+        try {
+            writer.write(iteration + ", " + timeToCreate + ", " + timeToUpdate + ", " +
+                    metrics.get("used_memory") + ", " + metrics.get("cpu_load") + "\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void performanceTest(int n) {
         List<Integer> projectIds = new ArrayList<>();
         try (FileWriter writer = new FileWriter("projectCreateUpdate.csv")) {
-            writer.write("#n, time_to_create, time_to_update\n");
+            writer.write("#n, time_to_create, time_to_update, used_memory, cpu_load\n");
 
             // Create and Update Projects
             for (int i = 1; i <= n; i++) {
@@ -79,7 +106,8 @@ public class ProjectTest {
                 long timeToUpdate = System.nanoTime() - startTime;
 
                 // Store create and update times
-                writer.write(i + ", " + timeToCreate + ", " + timeToUpdate + "\n");
+//                writer.write(i + ", " + timeToCreate + ", " + timeToUpdate + "\n");
+                recordMetrics(writer, i, timeToCreate, timeToUpdate);
                 delay();
             }
         } catch (IOException e) {
@@ -87,7 +115,7 @@ public class ProjectTest {
         }
 
         try (FileWriter writer = new FileWriter("projectDelete.csv")) {
-            writer.write("#n, time_to_delete\n");
+            writer.write("#n, time_to_delete, time_to_update(n/a), used_memory, cpu_load\n");
 
             // Delete Projects and write metrics to CSV
             for (int i = 0; i < projectIds.size(); i++) {
@@ -96,7 +124,8 @@ public class ProjectTest {
                 long timeToDelete = System.nanoTime() - startTime;
 
                 // Write all times to CSV
-                writer.write("" + (projectIds.size()-i) + ", "+ timeToDelete + "\n");
+//                writer.write("" + (projectIds.size()-i) + ", "+ timeToDelete + "\n");
+                recordMetrics(writer, projectIds.size()-i, timeToDelete, 0);
                 delay();
             }
         } catch (IOException e) {
@@ -106,7 +135,7 @@ public class ProjectTest {
 
     public static void main(String[] args) {
         ProjectTest test = new ProjectTest();
-        int n = 10000;
+        int n = 1000;
 
         long startTime = System.nanoTime(); // Get the start time
         test.performanceTest(n);
